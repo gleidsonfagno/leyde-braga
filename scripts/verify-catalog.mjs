@@ -14,8 +14,10 @@ const html = await (await get(`${storefront}/categoria`)).text();
 assert.ok(html.includes(`${list.pagination.total} produtos`));
 assert.equal((html.match(/<article\b/g) || []).length, list.data.length);
 for (const product of list.data) assert.ok(html.includes(product.slug), product.slug);
-for (const brand of brands.data) assert.ok(html.includes(`marca=${brand.slug}`), brand.slug);
-for (const category of categories.data) assert.ok(html.includes(`cat=${category.slug}`), category.slug);
+assert.ok(html.includes('name="cat"'));
+assert.ok(html.includes('name="marca"'));
+for (const brand of brands.data) assert.ok(html.includes(`value="${brand.slug}"`), brand.slug);
+for (const category of categories.data) assert.ok(html.includes(`value="${category.slug}"`), category.slug);
 
 if (list.pagination.total > 20) {
   const page = await (await get(`${api}/products?pageSize=20&page=2`)).json();
