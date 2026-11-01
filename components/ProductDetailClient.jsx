@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { categoriaDe, LEYDE, whatsappLink } from '../lib/config';
-import { buscarProduto, estoqueLabel, formatarBRL } from '../lib/products';
+import { LEYDE, whatsappLink } from '../lib/config';
+import { estoqueLabel } from '../lib/catalog';
+import { formatarBRL } from '../lib/money';
+import ProductImage from './ProductImage';
 import { useCart } from './CartContext';
 import { useToast } from './ToastContext';
 
-export default function ProductDetailClient({ slug }) {
+export default function ProductDetailClient({ produto }) {
   const router = useRouter();
   const { adicionar } = useCart();
   const { showToast } = useToast();
 
-  const produto = buscarProduto(slug);
-  const categoria = produto ? categoriaDe(produto.categoria) : null;
   const [activeTab, setActiveTab] = useState('descricao');
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(produto?.imagem || '');
@@ -23,23 +23,19 @@ export default function ProductDetailClient({ slug }) {
     if (produto) {
       document.title = `${produto.nome} — LEYDE BRAGA`;
       const meta = document.querySelector('meta[name="description"]');
-      if (meta) meta.content = produto.resumo || produto.descricao;
+      if (meta) meta.content = produto.descricao;
       setMainImage(produto.imagem);
     }
   }, [produto]);
 
   const estoque = useMemo(() => (produto ? estoqueLabel(produto) : null), [produto]);
   const indisponivel = produto?.disponibilidade === 'indisponivel';
-  const preco = produto?.preco > 0 ? formatarBRL(produto.preco) : 'Preço a definir';
-  const parcela =
-    produto && produto.preco > 0 && produto.parcelas > 1
-      ? `até ${produto.parcelas}x de ${formatarBRL(produto.preco / produto.parcelas)} sem juros`
-      : '';
+  const preco = produto ? formatarBRL(produto.preco) : '';
 
   if (!produto) {
     return (
       <main className="container" id="produto-main" style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-        Produto não encontrado. <Link href="/">Voltar à loja</Link>
+        Produto não encontrado. <Link prefetch={false} href="/">Voltar à loja</Link>
       </main>
     );
   }
@@ -56,16 +52,16 @@ export default function ProductDetailClient({ slug }) {
     }
   };
 
-  const specs = Object.entries(produto.especificacoes || {});
+  const specs = [['Código', produto.codigo], ['Marca', produto.marca], ['Categoria', produto.categoriaNome]];
 
   return (
     <main className="container" id="produto-main">
       <div className="breadcrumb">
-        <Link href="/">Início</Link>
-        {categoria ? (
+        <Link prefetch={false} href="/">Início</Link>
+        {produto.categoria ? (
           <>
             {' / '}
-            <Link href={`/categoria?cat=${encodeURIComponent(categoria.id)}`}>{categoria.nome}</Link>
+            <Link prefetch={false} href={`/categoria?cat=${encodeURIComponent(produto.categoria)}`}>{produto.categoriaNome}</Link>
           </>
         ) : null}
         {' / '}
@@ -75,10 +71,12 @@ export default function ProductDetailClient({ slug }) {
       <div className="produto">
         <div className="produto-galeria">
           <div className="galeria-main">
-            <img id="galeria-img" src={mainImage} alt={produto.nome} />
+            <ProductImage id="galeria-img" src={mainImage} alt={produto.imagens.find((imagem) => imagem.url === mainImage)?.alt || produto.nome} />
           </div>
           <div className="galeria-minis">
-            <img className="ativo" src={produto.imagem} alt="Foto 1" data-src={produto.imagem} onClick={() => setMainImage(produto.imagem)} />
+            {produto.imagens.map((imagem) => <button key={imagem.id} type="button" aria-label={`Ver ${imagem.alt || produto.nome}`} onClick={() => setMainImage(imagem.url)} style={{ border: 0, background: 'transparent' }}>
+              <ProductImage className={mainImage === imagem.url ? 'ativo' : ''} src={imagem.url} alt={imagem.alt || produto.nome} />
+            </button>)}
           </div>
         </div>
 
@@ -87,9 +85,8 @@ export default function ProductDetailClient({ slug }) {
           <h1>{produto.nome}</h1>
           {estoque ? <p className={`p-est ${estoque.cls}`}>{estoque.txt}</p> : null}
           <p className="p-preco">{preco}</p>
-          {parcela ? <p className="p-parcela">{parcela}</p> : null}
           <p className="p-resumo" style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '12px' }}>
-            {produto.resumo}
+            {produto.descricao}
           </p>
 
           {!indisponivel ? (
@@ -149,12 +146,6 @@ export default function ProductDetailClient({ slug }) {
           <button className={activeTab === 'espec' ? 'ativo' : ''} data-aba="espec" onClick={() => setActiveTab('espec')}>
             Especificações
           </button>
-          <button className={activeTab === 'composicao' ? 'ativo' : ''} data-aba="composicao" onClick={() => setActiveTab('composicao')}>
-            Composição
-          </button>
-          <button className={activeTab === 'uso' ? 'ativo' : ''} data-aba="uso" onClick={() => setActiveTab('uso')}>
-            Modo de usar
-          </button>
         </div>
 
         <div className="p-aba" data-painel="descricao" style={{ display: activeTab === 'descricao' ? '' : 'none' }}>
@@ -171,12 +162,6 @@ export default function ProductDetailClient({ slug }) {
               ))}
             </tbody>
           </table>
-        </div>
-        <div className="p-aba" data-painel="composicao" style={{ display: activeTab === 'composicao' ? '' : 'none' }}>
-          {produto.composicao}
-        </div>
-        <div className="p-aba" data-painel="uso" style={{ display: activeTab === 'uso' ? '' : 'none' }}>
-          {produto.modoUso}
         </div>
       </section>
     </main>

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { LEYDE } from '../lib/config';
+import { categoriasPrincipais } from '../lib/catalog';
 
-export default function Navigation() {
+export default function Navigation({ categorias, marcas }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -35,12 +35,13 @@ export default function Navigation() {
   return (
     <nav className="site-nav" aria-label="Categorias" ref={dropdownRef}>
       <div className="container">
-        <Link href="/">Início</Link>
-        {LEYDE.categorias.map((categoria) => (
-          <Link key={categoria.id} href={`/categoria?cat=${categoria.id}`}>
+        <Link prefetch={false} href="/">Início</Link>
+        {categoriasPrincipais(categorias).map((categoria) => (
+          <Link prefetch={false} key={categoria.id} href={`/categoria?cat=${categoria.slug}`}>
             {categoria.nome}
           </Link>
         ))}
+        <Link prefetch={false} href="/categoria">Todos os produtos</Link>
         <span
           className={`has-sub ${isOpen ? 'aberto' : ''}`}
           role="button"
@@ -52,13 +53,13 @@ export default function Navigation() {
         >
           Marcas
           <span className="dropdown">
-            {LEYDE.marcas.map((marca) => (
-              <Link
-                key={marca}
-                href={`/categoria?marca=${encodeURIComponent(marca)}`}
+            {marcas.map((marca) => (
+              <Link prefetch={false}
+                key={marca.id}
+                href={`/categoria?marca=${encodeURIComponent(marca.slug)}`}
                 onClick={() => setIsOpen(false)}
               >
-                {marca}
+                {marca.nome}
               </Link>
             ))}
           </span>

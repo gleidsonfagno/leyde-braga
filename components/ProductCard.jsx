@@ -3,18 +3,16 @@
 import Link from 'next/link';
 import { useCart } from './CartContext';
 import { useToast } from './ToastContext';
-import { formatarBRL, estoqueLabel } from '../lib/products';
+import { formatarBRL } from '../lib/money';
+import { estoqueLabel } from '../lib/catalog';
+import ProductImage from './ProductImage';
 
 export default function ProductCard({ produto }) {
   const { adicionar } = useCart();
   const { showToast } = useToast();
   const estoque = estoqueLabel(produto);
   const indisponivel = produto.disponibilidade === 'indisponivel';
-  const preco = produto.preco > 0 ? formatarBRL(produto.preco) : 'Preço a definir';
-  const parcela =
-    produto.preco > 0 && produto.parcelas > 1
-      ? `ou até ${produto.parcelas}x de ${formatarBRL(produto.preco / produto.parcelas)} sem juros`
-      : '';
+  const preco = formatarBRL(produto.preco);
 
   const handleAdd = (event) => {
     event.preventDefault();
@@ -26,17 +24,16 @@ export default function ProductCard({ produto }) {
 
   return (
     <article className="card" data-od-id={`card-${produto.slug}`}>
-      <Link className="card-img" href={`/produto?p=${produto.slug}`}>
-        <img loading="lazy" src={produto.imagem} alt={produto.nome} />
+      <Link prefetch={false} className="card-img" href={`/produto?p=${produto.slug}`}>
+        <ProductImage loading="lazy" src={produto.imagem} alt={produto.imagens[0]?.alt || produto.nome} />
       </Link>
       <span className={`est ${estoque.cls}`}>{estoque.txt}</span>
       <h3>
-        <Link href={`/produto?p=${produto.slug}`}>{produto.nome}</Link>
+        <Link prefetch={false} href={`/produto?p=${produto.slug}`}>{produto.nome}</Link>
       </h3>
       <span className="marca">{produto.marca}</span>
       <div className="preco">
         {preco}
-        {parcela ? <span className="parcela">{parcela}</span> : null}
       </div>
       <div className="btns">
         {indisponivel ? (

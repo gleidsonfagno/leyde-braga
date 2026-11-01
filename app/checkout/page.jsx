@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../../components/CartContext';
+import { useCartProducts } from '../../components/useCartProducts';
 import { LEYDE, whatsappLink } from '../../lib/config';
 import { montarMensagemPedido } from '../../lib/order';
-import { buscarProduto, formatarBRL } from '../../lib/products';
+import { formatarBRL, multiplicarPreco, somarValores, subtotalCarrinho } from '../../lib/money';
 import { normalizeText } from '../../lib/text';
 
 function paymentIcon(label) {
@@ -63,9 +64,9 @@ function paymentIcon(label) {
 
 export default function CheckoutPage() {
   const { cart, limpar, ready } = useCart();
-  const [linhas, setLinhas] = useState([]);
+  const { linhas, loading, error, recarregar, revalidar, indisponiveis } = useCartProducts(cart, ready);
   const [entregaValor, setEntregaValor] = useState(0);
-  const [entregaNull, setEntregaNull] = useState(false);
+  const [entregaNull, setEntregaNull] = useState(true);
   const [entregaMsg, setEntregaMsg] = useState('Digite o CEP ou o bairro para calcular a entrega.');
   const [entregaMsgColor, setEntregaMsgColor] = useState('var(--muted)');
   const [formData, setFormData] = useState({
@@ -102,7 +103,7 @@ export default function CheckoutPage() {
       setEntregaMsg('Este bairro não está no cadastro de entrega. Combinamos a entrega pelo WhatsApp.');
       setEntregaMsgColor('var(--accent-2)');
     } else {
-      setEntregaNull(false);
+      setEntregaNull(true);
       setEntregaValor(0);
       setEntregaMsg('Digite o CEP ou o bairro para calcular a entrega.');
       setEntregaMsgColor('var(--muted)');
@@ -110,23 +111,11 @@ export default function CheckoutPage() {
   };
 
   useEffect(() => {
-    if (!ready) return;
-    const validItems = cart
-      .map((item) => {
-        const produto = buscarProduto(item.slug);
-        return produto && produto.disponibilidade !== 'indisponivel' && item.qtd > 0 ? { produto, qtd: item.qtd } : null;
-      })
-      .filter(Boolean);
-
-    setLinhas(validItems);
-  }, [cart, ready]);
-
-  useEffect(() => {
     calcularEntrega(formData.bairro);
   }, [formData.bairro]);
 
-  const subtotal = linhas.reduce((sum, linha) => sum + (linha.produto.preco || 0) * linha.qtd, 0);
-  const temPrecos = linhas.every((linha) => linha.produto.preco > 0);
+  const subtotal = subtotalCarrinho(linhas);
+  const temPrecos = linhas.every((linha) => linha.produto.preco != null);
 
   const buscarCEP = async () => {
     const cep = formData.cep.replace(/\D/g, '');
@@ -172,11 +161,25 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validate()) return;
 
     setSubmitting(true);
+
+    try {
+      const atuais = await revalidar();
+      const assinatura = (itens) => JSON.stringify(itens.map(({ produto, qtd }) => [produto.id, produto.preco, qtd]));
+      if (assinatura(atuais) !== assinatura(linhas)) {
+        setErrors({ catalogo: 'O catálogo foi atualizado. Confira os itens e valores e confirme novamente.' });
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      setErrors({ catalogo: 'Não foi possível conferir os preços atuais. Tente novamente antes de confirmar.' });
+      setSubmitting(false);
+      return;
+    }
 
     const previous = parseInt(window.localStorage.getItem('leyde_pedido_contador') || '0', 10);
     const nextOrder = previous + 1;
@@ -200,7 +203,7 @@ export default function CheckoutPage() {
       entrega: entregaFinal,
       itens: linhas.map((linha) => ({ slug: linha.produto.slug, nome: linha.produto.nome, qtd: linha.qtd, preco: linha.produto.preco })),
       subtotal,
-      total: temPrecos ? subtotal + (entregaFinal || 0) : null,
+      total: temPrecos && entregaFinal != null ? somarValores(subtotal, entregaFinal) : null,
       data: new Date().toISOString(),
     };
 
@@ -209,8 +212,10 @@ export default function CheckoutPage() {
     window.location.href = whatsappLink(montarMensagemPedido(pedido));
   };
 
-  if (!linhas.length) {
-    if (!ready) {
+  if (error) return <main className="container"><h1 className="pagina-titulo">Finalizar pedido</h1><p role="alert">{error}</p><button className="btn" onClick={recarregar}>Tentar novamente</button></main>;
+
+  if (!linhas.length || loading) {
+    if (loading) {
       return (
         <main className="container">
           <h1 className="pagina-titulo">Finalizar pedido</h1>
@@ -224,12 +229,12 @@ export default function CheckoutPage() {
     return (
       <main className="container">
         <div className="breadcrumb">
-          <Link href="/">Início</Link> / <Link href="/carrinho">Carrinho</Link> / Finalizar pedido
+          <Link prefetch={false} href="/">Início</Link> / <Link prefetch={false} href="/carrinho">Carrinho</Link> / Finalizar pedido
         </div>
         <h1 className="pagina-titulo">Finalizar pedido</h1>
         <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--muted)' }}>
           <p style={{ fontSize: '18px', marginBottom: '8px' }}>Seu carrinho está vazio.</p>
-          <Link className="btn solid" href="/">
+          <Link prefetch={false} className="btn solid" href="/">
             Continuar comprando
           </Link>
         </div>
@@ -240,10 +245,12 @@ export default function CheckoutPage() {
   return (
     <main className="container">
       <div className="breadcrumb">
-        <Link href="/">Início</Link> / <Link href="/carrinho">Carrinho</Link> / Finalizar pedido
+        <Link prefetch={false} href="/">Início</Link> / <Link prefetch={false} href="/carrinho">Carrinho</Link> / Finalizar pedido
       </div>
       <h1 className="pagina-titulo">Finalizar pedido</h1>
 
+      {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
+      {errors.catalogo ? <p role="alert">{errors.catalogo}</p> : null}
       <form id="form-checkout" onSubmit={handleSubmit} noValidate>
         <div className="pg-layout">
           <div>
@@ -357,7 +364,7 @@ export default function CheckoutPage() {
                   <span>
                     {linha.produto.nome.slice(0, 40)} × {linha.qtd}
                   </span>
-                  <span>{linha.produto.preco > 0 ? formatarBRL(linha.produto.preco * linha.qtd) : '—'}</span>
+                  <span>{formatarBRL(multiplicarPreco(linha.produto.preco, linha.qtd))}</span>
                 </div>
               ))}
             </div>
@@ -371,7 +378,7 @@ export default function CheckoutPage() {
             </div>
             <div className="linha total">
               <span>Total</span>
-              <span id="r-total">{temPrecos ? formatarBRL(subtotal + (entregaNull ? 0 : entregaValor)) : 'a definir'}</span>
+              <span id="r-total">{temPrecos && !entregaNull ? formatarBRL(somarValores(subtotal, entregaValor)) : 'a combinar'}</span>
             </div>
             <button type="submit" className="btn solid block" id="btn-confirmar" disabled={submitting}>
               {submitting ? 'Processando...' : 'Confirmar pedido'}

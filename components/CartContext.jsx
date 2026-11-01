@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { normalizarCarrinho } from '../lib/cart';
 
 const CART_KEY = 'leyde_carrinho';
 const CartContext = createContext(null);
@@ -19,7 +20,7 @@ export function CartProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          setCart(parsed);
+          setCart(normalizarCarrinho(parsed));
         }
       }
     } catch {
@@ -29,9 +30,10 @@ export function CartProvider({ children }) {
   }, []);
 
   const persist = useCallback((nextCart) => {
-    setCart(nextCart);
+    const normalized = normalizarCarrinho(nextCart);
+    setCart(normalized);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(CART_KEY, JSON.stringify(nextCart));
+      window.localStorage.setItem(CART_KEY, JSON.stringify(normalized));
     }
   }, []);
 

@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { LEYDE, whatsappLink } from '../lib/config';
-import { formatarBRL } from '../lib/products';
+import { whatsappLink } from '../lib/config';
+import { formatarBRL, multiplicarPreco } from '../lib/money';
 import { formatarNumeroPedido, montarMensagemPedido } from '../lib/order';
 
 export default function ConfirmacaoClient({ pedidoQuery }) {
@@ -49,7 +49,7 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
   return (
     <main className="container">
       <div className="breadcrumb">
-        <Link href="/">Início</Link> / Pedido confirmado
+        <Link prefetch={false} href="/">Início</Link> / Pedido confirmado
       </div>
       <h1 className="pagina-titulo">Pedido confirmado</h1>
 
@@ -71,7 +71,7 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
                 <span>
                   {item.nome.slice(0, 40)} × {item.qtd}
                 </span>
-                <span>{item.preco > 0 ? formatarBRL(item.preco * item.qtd) : '—'}</span>
+                <span>{item.preco != null ? formatarBRL(multiplicarPreco(item.preco, item.qtd)) : '—'}</span>
               </div>
             ))}
             <div className="linha">

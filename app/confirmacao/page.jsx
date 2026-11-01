@@ -1,5 +1,6 @@
 import ConfirmacaoClient from '../../components/ConfirmacaoClient';
 
-export default function ConfirmacaoPage({ searchParams }) {
-  return <ConfirmacaoClient pedidoQuery={searchParams?.n || ''} />;
+export default async function ConfirmacaoPage({ searchParams }) {
+  const params = await searchParams;
+  return <ConfirmacaoClient pedidoQuery={params?.n || ''} />;
 }

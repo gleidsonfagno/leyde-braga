@@ -1,14 +1,8 @@
 import Link from 'next/link';
-import { LEYDE } from '../lib/config';
+import { categoriasPrincipais } from '../lib/catalog';
 
-const categoryImages = {
-  perfumaria: '/assets/images/banners/cat-perfumaria.jpg',
-  'corpo-e-banho': '/assets/images/banners/cat-corpo.jpg',
-  cabelos: '/assets/images/banners/cat-cabelos.jpg',
-  maquiagem: '/assets/images/banners/cat-maquiagem.jpg',
-};
-
-export default function CategoryTiles() {
+export default function CategoryTiles({ categorias }) {
+  if (!categorias.length) return null;
   return (
     <section className="secao" id="categorias" data-od-id="categorias">
       <div className="container">
@@ -17,14 +11,14 @@ export default function CategoryTiles() {
           <h2>O que você procura</h2>
         </div>
         <div className="grid-cat" id="grid-categorias">
-          {LEYDE.categorias.map((categoria) => (
-            <Link
+          {categoriasPrincipais(categorias).map((categoria) => (
+            <Link prefetch={false}
               key={categoria.id}
               className="cat-tile"
               data-od-id={`categoria-${categoria.id}`}
-              href={`/categoria?cat=${categoria.id}`}
+              href={`/categoria?cat=${categoria.slug}`}
             >
-              <img loading="lazy" src={categoryImages[categoria.id]} alt={categoria.nome} />
+              <img loading="lazy" src={categoria.imagem} alt={categoria.nome} />
               <span className="cat-nome">{categoria.nome}</span>
             </Link>
           ))}

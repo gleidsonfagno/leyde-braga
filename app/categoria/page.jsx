@@ -1,46 +1,31 @@
 import Link from 'next/link';
 import ProductCard from '../../components/ProductCard';
-import { LEYDE, categoriaDe } from '../../lib/config';
-import { PRODUTOS } from '../../lib/products';
-import { normalizeText } from '../../lib/text';
+import { catalogApi, obterTaxonomias } from '../../lib/catalog-api';
+import { categoriaHref as buildHref, filtrosDoCatalogo } from '../../lib/catalog';
+import CatalogMessage from '../../components/CatalogMessage';
 
 function Chip({ href, label, active }) {
   return (
-    <Link className={`chip${active ? ' ativo' : ''}`} href={href}>
+    <Link prefetch={false} className={`chip${active ? ' ativo' : ''}`} href={href}>
       {label}
     </Link>
   );
 }
 
-function buildHref(cat, marca, q) {
-  const params = new URLSearchParams();
-  if (cat) params.set('cat', cat);
-  if (marca) params.set('marca', marca);
-  if (q) params.set('q', q);
-  const search = params.toString();
-  return search ? `/categoria?${search}` : '/categoria';
-}
-
-export default function CategoriaPage({ searchParams }) {
-  const catAtual = searchParams?.cat || '';
-  const marcaAtual = searchParams?.marca ? decodeURIComponent(searchParams.marca) : '';
-  const q = (searchParams?.q || '').trim();
-
-  const lista = PRODUTOS.filter((produto) => {
-    if (catAtual && produto.categoria !== catAtual) return false;
-    if (marcaAtual && normalizeText(produto.marca) !== normalizeText(marcaAtual)) return false;
-    if (q) {
-      const alvo = normalizeText(`${produto.nome} ${produto.marca} ${produto.descricao || ''}`);
-      const termos = normalizeText(q).split(' ').filter(Boolean);
-      if (!termos.every((termo) => alvo.includes(termo))) return false;
-    }
-    return true;
-  });
+export default async function CategoriaPage({ searchParams }) {
+  const taxonomias = await obterTaxonomias();
+  const filtros = filtrosDoCatalogo(await searchParams || {}, taxonomias);
+  const { categoria: catAtual, marca: marcaAtual, q, page } = filtros;
+  let catalogo;
+  try { catalogo = await catalogApi.produtos(filtros); } catch { /* Falha não é catálogo vazio. */ }
+  const lista = catalogo?.produtos || [];
+  const total = catalogo?.paginacao.total || 0;
+  const paginas = Math.max(1, Math.ceil(total / 20));
 
   const titulo = catAtual
-    ? categoriaDe(catAtual)?.nome || 'Categorias'
+    ? taxonomias.categorias.find((categoria) => categoria.slug === catAtual)?.nome || 'Categorias'
     : marcaAtual
-      ? marcaAtual
+      ? taxonomias.marcas.find((marca) => marca.slug === marcaAtual)?.nome || marcaAtual
       : q
         ? `Resultados para "${q}"`
         : 'Categorias';
@@ -48,7 +33,7 @@ export default function CategoriaPage({ searchParams }) {
   return (
     <main className="container">
       <div className="breadcrumb">
-        <Link href="/">Início</Link> / <span id="crumb-atual">{titulo}</span>
+        <Link prefetch={false} href="/">Início</Link> / <span id="crumb-atual">{titulo}</span>
       </div>
 
       <h1 className="pagina-titulo" id="pagina-titulo">
@@ -57,33 +42,33 @@ export default function CategoriaPage({ searchParams }) {
 
       <div className="filtros" id="filtros-cat">
         <Chip href={buildHref('', marcaAtual, q)} label="Todas" active={!catAtual && !marcaAtual && !q} />
-        {LEYDE.categorias.map((categoria) => (
+        {taxonomias.categorias.map((categoria) => (
           <Chip
             key={categoria.id}
-            href={buildHref(categoria.id, marcaAtual, q)}
+            href={buildHref(categoria.slug, marcaAtual, q)}
             label={categoria.nome}
-            active={catAtual === categoria.id}
+            active={catAtual === categoria.slug}
           />
         ))}
       </div>
 
       <div className="filtros" id="filtros-marca">
         <Chip href={buildHref(catAtual, '', q)} label="Todas as marcas" active={!marcaAtual} />
-        {LEYDE.marcas.map((marca) => (
+        {taxonomias.marcas.map((marca) => (
           <Chip
-            key={marca}
-            href={buildHref(catAtual, marca, q)}
-            label={marca}
-            active={marcaAtual === marca}
+            key={marca.id}
+            href={buildHref(catAtual, marca.slug, q)}
+            label={marca.nome}
+            active={marcaAtual === marca.slug}
           />
         ))}
       </div>
 
       <div id="contador" style={{ fontSize: '13px', color: 'var(--muted-2)', marginBottom: '14px' }}>
-        {lista.length} {lista.length === 1 ? 'produto' : 'produtos'}
+        {catalogo ? `${total} ${total === 1 ? 'produto' : 'produtos'}` : 'Catálogo temporariamente indisponível'}
       </div>
 
-      {lista.length > 0 ? (
+      {!catalogo ? <CatalogMessage erro /> : lista.length > 0 ? (
         <div className="grid-prod" id="grid-produtos">
           {lista.map((produto) => (
             <ProductCard key={produto.slug} produto={produto} />
@@ -94,6 +79,11 @@ export default function CategoriaPage({ searchParams }) {
           Nenhum produto encontrado para este filtro.
         </div>
       )}
+      {catalogo && total > 20 ? <nav className="filtros" aria-label="Paginação de produtos" style={{ marginTop: '24px', alignItems: 'center' }}>
+        {page > 1 ? <Link prefetch={false} className="btn" href={buildHref(catAtual, marcaAtual, q, page - 1)}>Anterior</Link> : null}
+        <span>Página {page} de {paginas}</span>
+        {page < paginas ? <Link prefetch={false} className="btn" href={buildHref(catAtual, marcaAtual, q, page + 1)}>Próxima</Link> : null}
+      </nav> : null}
     </main>
   );
 }

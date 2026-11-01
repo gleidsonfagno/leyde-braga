@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { LEYDE } from '../lib/config';
 
 const logoMarca = {
   natura: 'natura',
@@ -10,7 +9,7 @@ const logoMarca = {
   'mary kay': 'marykay',
 };
 
-export default function BrandsBar() {
+export default function BrandsBar({ marcas }) {
   const handleFallback = (event) => {
     const img = event.currentTarget;
     const nome = img.getAttribute('data-nome') || img.alt || '';
@@ -25,25 +24,24 @@ export default function BrandsBar() {
   return (
     <section className="marcas" data-od-id="marcas">
       <div className="container" id="marcas-linha">
-        {LEYDE.marcas.map((marca) => {
-          const key = marca.toLowerCase();
-          const slug = logoMarca[key] || key;
+        {marcas.map((marca) => {
+          const logo = logoMarca[marca.nome.toLowerCase()];
           return (
-            <Link
-              key={marca}
-              href={`/categoria?marca=${encodeURIComponent(marca)}`}
-              data-od-id={`marca-${slug}`}
-              aria-label={`Filtrar por marca: ${marca}`}
-              title={marca}
+            <Link prefetch={false}
+              key={marca.id}
+              href={`/categoria?marca=${encodeURIComponent(marca.slug)}`}
+              data-od-id={`marca-${marca.slug}`}
+              aria-label={`Filtrar por marca: ${marca.nome}`}
+              title={marca.nome}
             >
-              <img
+              {logo ? <img
                 className="marca-logo"
-                src={`/assets/images/marcas/${slug}.svg`}
-                alt={marca}
-                data-nome={marca}
+                src={`/assets/images/marcas/${logo}.svg`}
+                alt={marca.nome}
+                data-nome={marca.nome}
                 loading="lazy"
                 onError={handleFallback}
-              />
+              /> : <span className="marca-fallback">{marca.nome}</span>}
             </Link>
           );
         })}

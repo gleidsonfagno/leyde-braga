@@ -2,29 +2,29 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { categoriasPrincipais } from '../lib/catalog';
 
 const slides = [
   {
     id: 'hero-perfumaria',
-    href: '/categoria?cat=perfumaria',
     image: '/assets/images/banners/hero-1.jpg',
     alt: 'Perfumaria',
   },
   {
     id: 'hero-corpo-banho',
-    href: '/categoria?cat=corpo-e-banho',
     image: '/assets/images/banners/hero-2.jpg',
     alt: 'Corpo e Banho',
   },
   {
     id: 'hero-maquiagem',
-    href: '/categoria?cat=maquiagem',
     image: '/assets/images/banners/hero-3.jpg',
     alt: 'Maquiagem',
   },
 ];
 
-export default function Hero() {
+export default function Hero({ categorias }) {
+  const principais = categoriasPrincipais(categorias);
+  const destinos = [principais[0], principais[1], principais.find((item) => /maquiagem|batom/.test(item.slug))];
   const [currentSlide, setCurrentSlide] = useState(0);
   const timerRef = useRef(null);
   const rootRef = useRef(null);
@@ -71,7 +71,7 @@ export default function Hero() {
       <div className="hero-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
         {slides.map((slide, index) => (
           <div key={slide.id} className="hero-slide">
-            <Link href={slide.href} data-od-id={slide.id}>
+            <Link prefetch={false} href={destinos[index] ? `/categoria?cat=${destinos[index].slug}` : '/categoria'} data-od-id={slide.id}>
               <img src={slide.image} alt={slide.alt} fetchPriority={index === 0 ? 'high' : 'auto'} />
             </Link>
           </div>

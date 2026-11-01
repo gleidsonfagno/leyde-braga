@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { LEYDE } from '../lib/config';
 import { useCart } from './CartContext';
 
@@ -10,12 +10,6 @@ export default function Header() {
   const { quantidade } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-
-  useEffect(() => {
-    const form = document.getElementById('form-busca');
-    if (!form) return undefined;
-    return undefined;
-  }, []);
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -29,7 +23,7 @@ export default function Header() {
     <header className="site-head">
       <div className="head-row container">
         <div className="logo">
-          <Link href="/">
+          <Link prefetch={false} href="/">
             {LEYDE.nomeLoja}
             <small>Beleza &amp; Perfumaria</small>
           </Link>
@@ -65,7 +59,7 @@ export default function Header() {
             </svg>
             <span className="act-txt">Insta</span>
           </a>
-          <Link className="act minicart" href="/carrinho" aria-label="Meu carrinho">
+          <Link prefetch={false} className="act minicart" href="/carrinho" aria-label="Meu carrinho">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M3 4h2l2.4 12.4a1.6 1.6 0 0 0 1.6 1.3h8.9a1.6 1.6 0 0 0 1.6-1.3L21 8H6" />
               <circle cx="10" cy="21" r="1" />

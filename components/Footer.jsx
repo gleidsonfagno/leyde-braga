@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { LEYDE, whatsappLink } from '../lib/config';
+import { categoriasPrincipais } from '../lib/catalog';
 
-export default function Footer() {
+export default function Footer({ categorias }) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -18,11 +19,12 @@ export default function Footer() {
         <div>
           <h4>Categorias</h4>
           <ul>
-            {LEYDE.categorias.map((categoria) => (
+            {categoriasPrincipais(categorias).map((categoria) => (
               <li key={categoria.id}>
-                <Link href={`/categoria?cat=${categoria.id}`}>{categoria.nome}</Link>
+                <Link prefetch={false} href={`/categoria?cat=${categoria.slug}`}>{categoria.nome}</Link>
               </li>
             ))}
+            <li><Link prefetch={false} href="/categoria">Todas as categorias</Link></li>
           </ul>
         </div>
         <div>

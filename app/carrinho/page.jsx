@@ -1,35 +1,29 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../components/CartContext';
-import { buscarProduto, formatarBRL } from '../../lib/products';
+import { useCartProducts } from '../../components/useCartProducts';
+import { formatarBRL, multiplicarPreco, subtotalCarrinho } from '../../lib/money';
+import ProductImage from '../../components/ProductImage';
 
 export default function CarrinhoPage() {
   const { cart, mudarQtd, remover, salvar, ready } = useCart();
   const router = useRouter();
 
-  const linhas = useMemo(
-    () =>
-      cart
-        .map((item) => {
-          const produto = buscarProduto(item.slug);
-          return produto && produto.disponibilidade !== 'indisponivel' && item.qtd > 0 ? { produto, qtd: item.qtd } : null;
-        })
-        .filter(Boolean),
-    [cart],
-  );
+  const { linhas, loading, error, recarregar, indisponiveis } = useCartProducts(cart, ready);
 
-  const subtotal = linhas.reduce((sum, linha) => sum + (linha.produto.preco || 0) * linha.qtd, 0);
-  const temValores = linhas.every((linha) => linha.produto.preco > 0);
+  const subtotal = subtotalCarrinho(linhas);
+  const temValores = linhas.every((linha) => linha.produto.preco != null);
 
   const handleFinalizar = () => {
     salvar(linhas.map((linha) => ({ slug: linha.produto.slug, qtd: linha.qtd })));
     router.push('/checkout');
   };
 
-  if (!ready) {
+  if (error) return <main className="container"><h1 className="pagina-titulo">Meu carrinho</h1><p role="alert">{error}</p><button className="btn" onClick={recarregar}>Tentar novamente</button></main>;
+
+  if (loading) {
     return (
       <main className="container">
         <h1 className="pagina-titulo">Meu carrinho</h1>
@@ -44,12 +38,13 @@ export default function CarrinhoPage() {
     return (
       <main className="container">
         <div className="breadcrumb">
-          <Link href="/">Início</Link> / Carrinho
+          <Link prefetch={false} href="/">Início</Link> / Carrinho
         </div>
         <h1 className="pagina-titulo">Meu carrinho</h1>
         <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--muted)' }}>
           <p style={{ fontSize: '18px', marginBottom: '8px' }}>Seu carrinho está vazio.</p>
-          <Link className="btn solid" href="/">
+          {indisponiveis > 0 ? <p>Os itens anteriores não estão mais no catálogo público. Escolha os produtos atuais da loja.</p> : null}
+          <Link prefetch={false} className="btn solid" href="/">
             Continuar comprando
           </Link>
         </div>
@@ -60,9 +55,10 @@ export default function CarrinhoPage() {
   return (
     <main className="container">
       <div className="breadcrumb">
-        <Link href="/">Início</Link> / Carrinho
+        <Link prefetch={false} href="/">Início</Link> / Carrinho
       </div>
       <h1 className="pagina-titulo">Meu carrinho</h1>
+      {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
 
       <div className="pg-layout">
         <div id="carrinho-itens">
@@ -78,23 +74,23 @@ export default function CarrinhoPage() {
             </thead>
             <tbody>
               {linhas.map(({ produto, qtd }) => {
-                const total = produto.preco > 0 ? formatarBRL(produto.preco * qtd) : '—';
+                const total = formatarBRL(multiplicarPreco(produto.preco, qtd));
                 return (
                   <tr key={produto.slug}>
                     <td>
                       <div className="ci">
-                        <Link href={`/produto?p=${produto.slug}`}>
-                          <img src={produto.imagem} alt={produto.nome} />
+                        <Link prefetch={false} href={`/produto?p=${produto.slug}`}>
+                          <ProductImage src={produto.imagem} alt={produto.nome} />
                         </Link>
                         <div>
-                          <Link href={`/produto?p=${produto.slug}`} style={{ fontWeight: 500 }}>
+                          <Link prefetch={false} href={`/produto?p=${produto.slug}`} style={{ fontWeight: 500 }}>
                             {produto.nome}
                           </Link>
                           <div style={{ color: 'var(--muted-2)', fontSize: '11px', marginTop: '2px' }}>{produto.marca}</div>
                         </div>
                       </div>
                     </td>
-                    <td>{produto.preco > 0 ? formatarBRL(produto.preco) : '—'}</td>
+                    <td>{formatarBRL(produto.preco)}</td>
                     <td>
                       <div className="qtd-stepper" style={{ height: '34px' }}>
                         <button type="button" style={{ height: '34px', width: '30px' }} onClick={() => mudarQtd(produto.slug, qtd - 1)}>
