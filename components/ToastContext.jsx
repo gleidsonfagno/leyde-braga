@@ -20,7 +20,7 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ toast, showToast }}>
       {children}
       {toast.visible ? (
-        <div className="toast mostrar" role="alert" aria-live="polite">
+        <div className="toast mostrar" role="status" aria-live="polite">
           {toast.message}
         </div>
       ) : null}

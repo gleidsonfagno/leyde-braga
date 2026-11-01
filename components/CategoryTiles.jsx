@@ -14,11 +14,11 @@ export default function CategoryTiles({ categorias }) {
           {categoriasPrincipais(categorias).map((categoria) => (
             <Link prefetch={false}
               key={categoria.id}
-              className="cat-tile"
+              className={`cat-tile original-category tema-${categoria.tema}`}
               data-od-id={`categoria-${categoria.id}`}
               href={`/categoria?cat=${categoria.slug}`}
             >
-              <img loading="lazy" src={categoria.imagem} alt={categoria.nome} />
+              <span className="category-monogram" aria-hidden="true">LB</span>
               <span className="cat-nome">{categoria.nome}</span>
             </Link>
           ))}

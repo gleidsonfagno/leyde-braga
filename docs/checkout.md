@@ -18,7 +18,7 @@ Conforme orientação da loja, Ayrton Senna (incluindo I/1), Ayrton Senna II/2, 
 
 Para os outros bairros de Altamira, a loja informou apenas uma referência inicial: **a partir de R$ 5,00, a confirmar pelo WhatsApp**. Essa estimativa aparece no resumo e na mensagem, sem ser somada como se fosse uma taxa final. Para bairros grátis, o total já é calculado. Taxas exatas poderão ser adicionadas à tabela quando definidas pela loja. Endereços fora de Altamira/PA permanecem sob consulta.
 
-O CEP de origem informado é `68375-368`. Não foi inventado um número de imóvel, ponto GPS da loja ou preço por quilômetro. Sem esses parâmetros, não há cotação por distância equivalente à de aplicativos de corrida. O ponto capturado do cliente ajuda a loja a localizar a entrega, mas não estabelece por si só uma tarifa.
+O CEP de origem foi informado apenas como referência e foi retirado da configuração pública, por solicitação de privacidade da loja. Não foi inventado um número de imóvel, ponto GPS da loja ou preço por quilômetro. Sem esses parâmetros, não há cotação por distância equivalente à de aplicativos de corrida. O ponto capturado do cliente ajuda a loja a localizar a entrega, mas não estabelece por si só uma tarifa.
 
 O frete é derivado do endereço atual do formulário, sem um estado de cálculo que possa ficar desatualizado ao trocar bairro/cidade. As mensagens de pedido e confirmação usam a mesma descrição. Os testes cobrem os bairros autorizados, aliases, homônimos fora da cidade, estimativas e somas de centavos.
 

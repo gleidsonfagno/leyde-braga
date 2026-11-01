@@ -1,0 +1,175 @@
+{
+  "data": "2026-11-01",
+  "origem": "https://leyde-braga-admin.vercel.app/api/v1/products",
+  "observacao": "Inventário público; não comprova titularidade nem autorização. Parâmetros de URL omitidos.",
+  "imagens": [
+    {
+      "produto": "locao-hidratante-desodorante-corporal-nativa-spa-ameixa-400ml-lb-est-0055",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B88077/28c5ab48-16dc-41df-8a1e-f73416306c01-b88077-1.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "quasar-blue-desodorante-colonia-100ml-lb-est-0053",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B51244/89e189c7-29b3-4a61-9bb6-37dc09377d97-bot-51244-quasar-blue-colonia-frontal-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "locao-noturna-desodorante-corporal-nativa-spa-orquidea-noire-400ml-lb-est-0052",
+      "marca": "O Boticário",
+      "imagem": "https://res.cloudinary.com/beleza-na-web/image/upload/w_1500%2Cf_avif%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/products/B49958/BOT_NATIVA-SPA_ORQUIDEA_CREME-HIDRATANTE_49958_FRONTAL_1.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "refil-locao-desodorante-hidratante-corporal-cuide-se-bem-deleite-350ml-lb-est-0048",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B85542/ff18fe86-c714-456b-ba4e-19a159a84e53-bot-85542-cuide-se-bem-de-leite-creme-hidratante-refil-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "her-code-eau-de-parfum-50ml-lb-est-0047",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B50022/e96941b2-24cc-4117-ba35-42b12a2d919a-bot-50022-her-code-perfume-edp-perfume-frontal-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "grace-rouge-absolu-deo-parfum-100ml-11051",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171239/6.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "floratta-gold-desodorante-colonia-75ml-lb-est-0045",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B51448/60546dce-fff0-4162-a608-cd239631b2dc-floratta-gold-desodorante-colonia-75ml-b51448-principal-1.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "locao-hidratante-desodorante-corporal-cuide-se-bem-nuvem-400ml-lb-est-0043",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B49888/1fa93acb-8255-4bdb-b16e-bdbcb3a7fc5d-bot-49888-cuide-se-bem-nuvem-locao-400ml-frontal-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "locao-desodorante-hidratante-corporal-cuide-se-bem-deleite-400ml-lb-est-0042",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B85124/9cb31cfb-9ea5-4c3c-b1b7-b603f8aa0480-bot-85124-cuide-se-bem-de-leite-creme-hidratante-400ml-frontal-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "coffee-addictive-oriental-aromatico-desodorante-colonia-100ml-56402",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B56402/e712da26-f8d0-4f5e-b466-9cde5a875cc6-bot-56402-coffee-addictive-masc-colonia-frontal-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "egeo-cogu-desodorante-colonia-90ml-87139",
+      "marca": "O Boticário",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/B87139/da05c78a-0d0f-493c-bfa9-f8f5269af194-bot-87139-egeo-cogu-desodorante-colonia-01.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "creme-energizante-corporal-2-em-1-tododia-energia-flor-de-gengibre-e-tangerina-400-ml-lb-est-0037",
+      "marca": "Natura",
+      "imagem": "https://production.na01.natura.com/dw/image/v2/BFKR_PRD/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dwc608a435/produto-joia/background/desktop/152300.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "desodorante-antitranspirante-roll-on-natura-homem-sagaz-75-ml-lb-est-0035",
+      "marca": "Natura",
+      "imagem": "https://production.na01.natura.com/dw/image/v2/BFKR_PRD/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw1113325c/produto-joia/background/desktop/155842.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "venyx-deo-colonia-100ml-10124",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/164690/10124-venyx-1.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "venyx-l-or-deo-colonia-100ml-10147",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/164716/Venyx_lor.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "spot-celebration-for-her-deo-colonia-75ml-11016",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/166230/3.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "rebelle-madness-deo-colonia-75ml-10208",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171751/10208_REBELLE_Madness.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "lattitude-stamina-deo-colonia-pocket-15ml-lb-est-0016",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/160529/850005.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "lattitude-stamina-deo-colonia-100ml-10142",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171824/Novo-Projeto---2025-08-12T074437.038.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "oleo-desodorante-corporal-joli-cupuacu-e-fava-tonka-200ml-lb-est-0014",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/165134/33001---JOLI---Cupuaco-_-Fava-Tonka-Oleo-Desodorante-Corporal---1100x1100.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "oleo-em-creme-joli-cupuacu-e-fava-tonka-200ml-lb-est-0013",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/165088/33000---JOLI---Cupuaco-_-Fava-Tonka-Oleo-em-Creme-Desodorante-Corporal---1100x1100.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "oleo-em-creme-joli-cafe-e-frutas-vermelhas-200ml-lb-est-0012",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171743/33003---JOLI---Coffee-_-Red-Berries-Oleo-em-Creme-Desodorante-Corporal---1100x1100.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "oleo-desodorante-corporal-joli-ameixa-e-jasmine-200ml-33038",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/165101/33038--------jOLi-Oleo-Desodorante-Corporal-1---1---1-.png.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "feelin-sexy-for-her-deo-colonia-15ml-lb-est-0008",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/160493/850009--2-.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "feelin-sexy-for-her-deo-colonia-100ml-10115",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171919/HER---Still--1-.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "dazzle-deo-colonia-60ml-10114",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/164973/Tradicional.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "lattitude-adventure-deo-colonia-100ml-10157",
+      "marca": "Hinode",
+      "imagem": "https://hinodegroup.vtexassets.com/arquivos/ids/171788/Novo-Projeto---2025-08-12T074714.239.png",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    },
+    {
+      "produto": "leave-in-memorizador-siage-pro-cronology-100-ml-lb-est-0004",
+      "marca": "Eudora",
+      "imagem": "https://cdn.gbmedia.com.br/images/w_1500%2Cf_webp%2Cfl_progressive%2Cq_auto%3Aeco%2Cw_800/v1/imagens/product/E53096/eafbb5da-a269-4def-8e6c-e7601cc68cd2-ed-cabelos-siage-leavein-cronology-100ml-53096-frontal-1.jpg",
+      "autorizacao": "Pendente de comprovação pela consultoria/fornecedor; não presumir licença pelo acesso à URL"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+# Privacidade, atendimento, imagens e acessibilidade
+
+## Escopo e dados confirmados
+
+A loja se identifica como LEYDE BRAGA, catálogo de consultores independentes em Altamira/PA, com contato pelo WhatsApp já informado na aplicação. Não foi fornecida identificação civil/empresarial completa. A responsável solicitou que o endereço residencial não fosse publicado. Não foram criados CPF, CNPJ, e-mail, endereço, vínculo oficial com marcas ou declarações de licença fictícios. O CEP de origem, sem uso no cálculo, saiu de `lib/config.js` e desta documentação atual.
+
+As páginas públicas descrevem o fluxo real: API de catálogo, carrinho local, ViaCEP, localização opcional pontual e preparação da mensagem para WhatsApp. Nenhum cadastro público, pagamento online ou banco de pedidos foi adicionado. Políticas de entrega e pagamento refletem as regras já informadas pela loja; a página de trocas preserva os direitos legais e não cria exclusões genéricas para cosméticos.
+
+## Implementação
+
+- Sete páginas no rodapé: privacidade, termos do catálogo, cookies/armazenamento, entregas/pagamentos, trocas/devoluções, acessibilidade e direitos autorais. Datas e metadados próprios; páginas fora da lista permitida não são políticas válidas.
+- Aviso de armazenamento em fluxo normal da página, sem bloquear a loja nem cobrir controles. Preferências podem ser reabertas no rodapé. O diálogo usa controles nativos, ciclo de Tab/Shift+Tab e Escape.
+- Cookies opcionais não são condição para consultar o catálogo ou enviar uma solicitação. A preferência usa `leyde_privacidade_v1`, é vinculada à ferramenta/versão e vence em 180 dias. GPC e Do Not Track mantêm estatísticas desligadas; mudanças em outra aba são consideradas. Se o armazenamento falhar, a escolha vale somente na sessão.
+- Não existe Analytics/Pixel ativo na configuração entregue. Há integração opcional de Google Analytics (`NEXT_PUBLIC_GA_MEASUREMENT_ID`, público, vazio em `.env.example`). O script só é inserido após consentimento específico válido. Revogar desativa novos eventos, remove o script e os cookies `_ga` acessíveis, sem afetar o carrinho. Checkout e confirmação mantêm estatísticas desativadas. Os eventos próprios usam apenas origem/caminho, sem query, busca, título com dados pessoais, formulário ou coordenadas.
+- Não houve tráfego real para um coletor de Analytics no teste. Antes de ativar qualquer ID: revisar política/transferências, configurar a propriedade com medição otimizada/enhanced measurement, compartilhamentos e publicidade desativados e verificar na rede a ausência de dados de formulário e URLs de pedido. O script do Google é código de terceiro; os testes simulados não validam a configuração de uma conta externa. Ativar outra ferramenta exige adaptar o controle e renovar a escolha.
+- Pedido local vence em 30 dias e é limpo na próxima verificação. Botão com confirmação na página de privacidade apaga carrinho, pedido e contador locais. Não apaga mensagens do WhatsApp nem registros dos prestadores. Não foi inventado prazo de retenção para a operação fora do site; a loja precisa defini-lo conforme suas obrigações.
+- `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` e `Permissions-Policy` limitam recursos desnecessários sem bloquear a geolocalização solicitada pelo cliente.
+
+## Acessibilidade implementada
+
+Atalho para o conteúdo; menu Marcas com botão real, estado expandido, Tab e Escape; destaques manuais sem rotação automática e slides inativos fora da navegação; textos alternativos e miniaturas decorativas; nomes de controles de quantidade; mensagens de erro associadas aos campos e foco no primeiro campo inválido; grupo de pagamento identificado; foco visível; contraste de textos e estados revisado; aviso que não cobre foco; respeito ao zoom e às preferências de movimento reduzido já existentes.
+
+As cores revisadas de texto passam 4,5:1 sobre branco e os painéis claros utilizados. O foco tem indicação com contraste sobre os fundos verificados. Isso não equivale a uma auditoria integral WCAG: fotos de fornecedores, leitores de tela reais e serviços externos ainda precisam de avaliação. Não foi instalada uma sobreposição automática de acessibilidade.
+
+## Imagens e pendências
+
+O usuário informou não ter autorização para os banners. Foram retirados sete JPEGs de banners/categorias. Quatro arquivos SVG de logos sem comprovação de licença também deixaram de ser usados e foram retirados; os nomes das marcas continuam em texto. O novo material é composição CSS e texto próprios. Os arquivos retirados permanecem no histórico Git anterior; não foi reescrito o histórico nem alterada uma implantação já publicada.
+
+As 28 fotos ativas da API estão listadas em `inventario-imagens-produtos.json`, com domínio e referência pública sem parâmetros. A presença em CDN, o crédito ao titular ou a condição de consultor não comprovam autorização. A loja precisa verificar os contratos/termos dos materiais de cada marca, guardar comprovantes e créditos exigidos, retirar fotos não permitidas ou substituí-las por fotografias próprias autorizadas. Fotos de referência arquivadas em `public/assets/images/prod` continuam sem uso na aplicação e sem licença comprovada nesta revisão; não devem ser reutilizadas sem verificação.
+
+Também permanecem pendentes: identificar juridicamente o responsável pelo tratamento/fornecedor; avaliar com orientação profissional a informação comercial exigível para o fluxo real de vendas, preservando a residência por uma solução legítima; definir retenção e atendimento de direitos nos registros fora do navegador; verificar os contratos de hospedagem e demais prestadores. Ser um catálogo com atendimento pelo WhatsApp não permite afirmar, por si só, dispensa de obrigações de proteção de dados ou de consumo. A implementação não garante ausência de processos nem conformidade jurídica integral.
+
+## Verificação
+
+`npm test` cobre consentimento, versão, prazo, mudança de ferramenta, sinal de privacidade, carregamento/revogação do coletor com DOM simulado, minimização de eventos, expiração local e cálculo de contraste, além das funcionalidades anteriores. `npm run test:policies` verifica as páginas e os cabeçalhos sem modificar dados. `npm run test:integration` continua verificando o catálogo real em modo de leitura. Nenhum pedido foi enviado e o GPS real não foi acessado.
+
+Resultado da versão entregue: build aprovado; 28 testes unitários aprovados; sete políticas e respostas 404 verificadas; integração de leitura aprovada. No navegador: imagens sem atributo alt ausentes; nenhum script de rastreamento carregado; salto de conteúdo; menu por teclado e Escape; ciclo de foco do diálogo; seleção manual de destaque; erro do checkout com foco em `f-nome` e mensagem associada; exclusão apenas de dados da instância de teste; política e diálogo em viewport de 320 px sem rolagem horizontal. O teste móvel é pontual e não substitui avaliação integral de reflow/zoom, leitores de tela e todas as combinações de dispositivo. Sem erros de console observados.
+
+## Fontes consultadas
+
+- [LGPD, texto atualizado na Câmara dos Deputados](https://www2.camara.leg.br/legin/fed/lei/2018/lei-13709-14-agosto-2018-787077-normaatualizada-pl.html).
+- [ANPD: escolhas de cookies, rejeição e opções desativadas por padrão](https://www.gov.br/anpd/pt-br/assuntos/noticias/anpd-emite-recomendacoes-para-adequacao-da-pratica-de-coleta-de-cookies-do-portal-gov.br).
+- [Câmara: identificação do fornecedor e comércio eletrônico](https://www2.camara.leg.br/atividade-legislativa/comissoes/comissoes-permanentes/cdc/noticias/comecam-a-valer-regras-mais-rigidas-para-o-comercio-eletronico-brasileiro).
+- [Direito de arrependimento, Agência Gov](https://agenciagov.ebc.com.br/noticias/202511/consumidor-tem-direito-ao-arrependimento-em-compras-on-line).
+- [W3C: contraste mínimo](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) e [WCAG 2.2](https://www.w3.org/TR/WCAG22/).
+- [Google: controles de privacidade, sinais e desativação](https://developers.google.com/tag-platform/security/guides/privacy).
+- [Lei de direitos autorais, texto atualizado na Câmara](https://www2.camara.leg.br/legin/fed/lei/1998/lei-9610-19-fevereiro-1998-365399-normaatualizada-pl.html).

@@ -69,7 +69,7 @@ export default function CarrinhoPage() {
                 <th>Preço</th>
                 <th>Quantidade</th>
                 <th>Total</th>
-                <th />
+                <th><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody>
@@ -93,24 +93,26 @@ export default function CarrinhoPage() {
                     <td>{formatarBRL(produto.preco)}</td>
                     <td>
                       <div className="qtd-stepper" style={{ height: '34px' }}>
-                        <button type="button" style={{ height: '34px', width: '30px' }} onClick={() => mudarQtd(produto.slug, qtd - 1)}>
+                        <button type="button" aria-label={`Diminuir quantidade de ${produto.nome}`} style={{ height: '34px', width: '30px' }} onClick={() => mudarQtd(produto.slug, qtd - 1)}>
                           −
                         </button>
                         <input
                           type="number"
+                          aria-label={`Quantidade de ${produto.nome}`}
                           value={qtd}
                           min="1"
+                          max="99"
                           onChange={(event) => mudarQtd(produto.slug, parseInt(event.target.value, 10) || 1)}
                           style={{ height: '34px', width: '40px' }}
                         />
-                        <button type="button" style={{ height: '34px', width: '30px' }} onClick={() => mudarQtd(produto.slug, qtd + 1)}>
+                        <button type="button" aria-label={`Aumentar quantidade de ${produto.nome}`} style={{ height: '34px', width: '30px' }} onClick={() => mudarQtd(produto.slug, qtd + 1)}>
                           +
                         </button>
                       </div>
                     </td>
                     <td>{total}</td>
                     <td>
-                      <button className="rem" onClick={() => remover(produto.slug)}>
+                      <button className="rem" aria-label={`Remover ${produto.nome} do carrinho`} onClick={() => remover(produto.slug)}>
                         Remover
                       </button>
                     </td>

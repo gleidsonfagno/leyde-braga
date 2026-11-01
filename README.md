@@ -38,8 +38,6 @@ public/assets/
   css/loja.css             Estilos e regras responsivas da loja
   fonts/                   Fontes locais utilizadas por app/globals.css
   images/
-    banners/               Banners principais e imagens das categorias
-    marcas/                Logos, com caminhos montados em BrandsBar
     prod/                  Imagens dos 12 produtos de exemplo
     favicon.svg            Ícone da loja
 docs/                      Documentação da estrutura e da limpeza
@@ -55,6 +53,8 @@ next.config.mjs            Configuração do Next.js
 - O carrinho guarda somente slugs e quantidades no `localStorage`; preços e detalhes são consultados novamente na API. Itens removidos ou desativados deixam de compor o pedido.
 - O último pedido ainda é salvo no `localStorage`, apenas no navegador utilizado. Antes de montar a mensagem, o checkout revalida os produtos; alterações de preço ou retirada de itens exigem nova confirmação.
 - O checkout consulta o ViaCEP e prepara a mensagem de pedido para o WhatsApp.
+- Políticas públicas: `/privacidade`, `/termos-de-uso`, `/cookies`, `/entregas-e-pagamentos`, `/trocas-e-devolucoes`, `/acessibilidade` e `/direitos-autorais`.
+- Os banners e as categorias usam composições próprias em CSS. Banners fotográficos e logos sem comprovação de autorização foram retirados; marcas são identificadas em texto. As 28 fotos da API têm inventário de pendências em `docs/inventario-imagens-produtos.json`.
 - O backend e o painel estão no repositório separado `leyde-braga-admin`. A API atual não fornece pedidos, taxas de entrega, formas de pagamento nem dados institucionais; esses recursos mantêm o fluxo/configuração local.
 - O estoque não faz parte da resposta pública: a vitrine mostra “Consulte disponibilidade”. Composição e modo de uso não são inventados quando ausentes da API. O checkout permite 1x ou 2x no cartão, conforme a regra da loja, e calcula os valores somente quando o frete é conhecido. A galeria exibe todas as referências de imagens retornadas.
 - O arquivo de exemplos não é importado pela aplicação e não serve como fallback quando a API falha. Falhas exibem mensagem e opção de tentar novamente, diferentes de uma busca sem resultados.
@@ -79,6 +79,7 @@ npm run build
 # Com a vitrine já em execução em http://127.0.0.1:3137:
 # npm run start -- --hostname 127.0.0.1 --port 3137
 npm run test:integration
+npm run test:policies
 ```
 
 O teste de integração realiza somente leituras. `STOREFRONT_URL` e `CATALOG_API_URL` permitem testar outros endereços. Ele confere o catálogo real, paginação, todas as categorias e marcas, busca combinada com filtros, detalhe, atualização do carrinho, exclusão de campos privados e entradas inválidas. `npm test` cobre também falhas de transporte, respostas incompatíveis, carrinhos antigos/adulterados e cálculos decimais exatos.
@@ -96,3 +97,5 @@ O resultado da auditoria está em [docs/estrutura-e-limpeza.md](docs/estrutura-e
 O resultado da integração está em [docs/integracao-api.md](docs/integracao-api.md).
 
 As funções de localização, entrega e pagamento do checkout estão documentadas em [docs/checkout.md](docs/checkout.md).
+
+Privacidade, consentimento, acessibilidade e pendências de direitos de imagem estão em [docs/privacidade-e-acessibilidade.md](docs/privacidade-e-acessibilidade.md). O Analytics permanece desligado enquanto `NEXT_PUBLIC_GA_MEASUREMENT_ID` estiver vazio; a infraestrutura de consentimento não é uma certificação jurídica ou de acessibilidade.

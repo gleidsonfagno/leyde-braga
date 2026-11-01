@@ -33,7 +33,8 @@ export function CartProvider({ children }) {
     const normalized = normalizarCarrinho(nextCart);
     setCart(normalized);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(CART_KEY, JSON.stringify(normalized));
+      try { window.localStorage.setItem(CART_KEY, JSON.stringify(normalized)); }
+      catch { /* Carrinho continua utilizável na sessão quando o armazenamento é bloqueado. */ }
     }
   }, []);
 

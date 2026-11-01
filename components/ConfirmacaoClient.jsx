@@ -8,20 +8,15 @@ import { formatarNumeroPedido, montarMensagemPedido } from '../lib/order';
 import { mapaLocalizacao } from '../lib/location';
 import { textoFretePedido, textoTotalPedido } from '../lib/delivery';
 import { descreverPagamento } from '../lib/payment';
+import { lerPedidoLocal } from '../lib/order-storage';
 
 export default function ConfirmacaoClient({ pedidoQuery }) {
   const [pedido, setPedido] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('leyde_pedido');
-    if (stored) {
-      try {
-        setPedido(JSON.parse(stored));
-      } catch {
-        setPedido(null);
-      }
-    }
+    try { setPedido(lerPedidoLocal(window.localStorage)); }
+    catch { setPedido(null); }
     setLoaded(true);
   }, []);
 

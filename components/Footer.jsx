@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { LEYDE, whatsappLink } from '../lib/config';
 import { categoriasPrincipais } from '../lib/catalog';
+import { policyLinks } from '../lib/policies';
+import { PrivacySettingsButton } from './PrivacyControls';
 
 export default function Footer({ categorias }) {
   const currentYear = new Date().getFullYear();
@@ -41,8 +43,10 @@ export default function Footer({ categorias }) {
           <h4>Sobre</h4>
           <ul>
             <li>
-              <a href="#categorias">Como comprar</a>
+              <Link prefetch={false} href="/termos-de-uso">Como comprar</Link>
             </li>
+            {policyLinks.map((page) => <li key={page.href}><Link prefetch={false} href={page.href}>{page.title}</Link></li>)}
+            <li><PrivacySettingsButton /></li>
             <li>
               <a href={whatsappLink('Olá! Gostaria de saber mais sobre a loja.')} target="_blank" rel="noopener noreferrer">
                 Fale conosco
@@ -54,6 +58,7 @@ export default function Footer({ categorias }) {
       <div className="foot-bottom">
         <div className="container">
           {currentYear} © {LEYDE.nomeLoja} — {LEYDE.cidade}/{LEYDE.uf}
+          <p>Catálogo de consultores independentes. Marcas e imagens de produtos pertencem a seus respectivos titulares.</p>
         </div>
       </div>
     </footer>

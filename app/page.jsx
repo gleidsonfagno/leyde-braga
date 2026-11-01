@@ -14,6 +14,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <h1 className="sr-only">Catálogo LEYDE BRAGA — perfumaria e cosméticos</h1>
       <Hero categorias={taxonomias.categorias} />
       <CategoryTiles categorias={taxonomias.categorias} />
       {!catalogo ? <CatalogMessage erro /> : !catalogo.produtos.length ? <CatalogMessage /> : <>

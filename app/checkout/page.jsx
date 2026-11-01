@@ -86,6 +86,8 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [localizacao, setLocalizacao] = useState(null);
+  const formRef = useRef(null);
+  const accessibleField = (name) => ({ 'aria-invalid': Boolean(errors[name]), 'aria-describedby': errors[name] ? `erro-${name}` : undefined });
 
   const frete = calcularFrete(formData);
   const subtotal = subtotalCarrinho(linhas);
@@ -137,6 +139,8 @@ export default function CheckoutPage() {
       if (cartaoCredito && total != null) dividirParcelas(total, parcelas);
     } catch (error) { nextErrors.parcelas = error.message; }
     setErrors(nextErrors);
+    const firstError = Object.keys(nextErrors)[0];
+    if (firstError) formRef.current?.elements.namedItem(firstError)?.focus?.();
     return Object.keys(nextErrors).length === 0;
   };
 
@@ -170,9 +174,9 @@ export default function CheckoutPage() {
       return;
     }
 
-    const previous = parseInt(window.localStorage.getItem('leyde_pedido_contador') || '0', 10);
+    let previous = 0;
+    try { previous = parseInt(window.localStorage.getItem('leyde_pedido_contador') || '0', 10) || 0; } catch { /* Atendimento pode continuar sem persistência. */ }
     const nextOrder = previous + 1;
-    window.localStorage.setItem('leyde_pedido_contador', String(nextOrder));
 
     const pedido = {
       numero: nextOrder,
@@ -198,7 +202,10 @@ export default function CheckoutPage() {
       data: new Date().toISOString(),
     };
 
-    window.localStorage.setItem('leyde_pedido', JSON.stringify(pedido));
+    try {
+      window.localStorage.setItem('leyde_pedido', JSON.stringify(pedido));
+      window.localStorage.setItem('leyde_pedido_contador', String(nextOrder));
+    } catch { /* A mensagem segue diretamente para o WhatsApp; não depende do armazenamento local. */ }
     limpar();
     window.location.href = whatsappLink(montarMensagemPedido(pedido));
   };
@@ -242,7 +249,9 @@ export default function CheckoutPage() {
 
       {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
       {errors.catalogo ? <p role="alert">{errors.catalogo}</p> : null}
-      <form id="form-checkout" onSubmit={handleSubmit} noValidate>
+      {Object.keys(errors).some((key) => key !== 'catalogo') ? <p role="alert">Revise os campos indicados. O pedido ainda não foi enviado.</p> : null}
+      <p className="checkout-privacy">Ao confirmar, seus dados serão usados para preparar a mensagem no WhatsApp. Revise antes de enviar. <Link prefetch={false} href="/privacidade">Como seus dados são tratados</Link> · <Link prefetch={false} href="/termos-de-uso">Condições do catálogo</Link></p>
+      <form ref={formRef} id="form-checkout" onSubmit={handleSubmit} noValidate>
         <fieldset disabled={submitting} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <div className="pg-layout">
           <div>
@@ -250,21 +259,23 @@ export default function CheckoutPage() {
               <h2 className="pg-titulo">1. Seus dados</h2>
               <div className="form-grupo">
                 <label htmlFor="f-nome">Nome completo *</label>
-                <input id="f-nome" name="nome" required placeholder="Como podemos te chamar?" value={formData.nome} onChange={handleChange} />
-                {errors.nome ? <p className="form-erro">{errors.nome}</p> : null}
+                <input id="f-nome" name="nome" required autoComplete="name" {...accessibleField('nome')} placeholder="Como podemos te chamar?" value={formData.nome} onChange={handleChange} />
+                {errors.nome ? <p id="erro-nome" className="form-erro">{errors.nome}</p> : null}
               </div>
               <div className="form-grupo">
                 <label htmlFor="f-whatsapp">WhatsApp *</label>
                 <input
                   id="f-whatsapp"
                   name="whatsapp"
+                  autoComplete="tel"
+                  {...accessibleField('whatsapp')}
                   required
                   inputMode="tel"
                   placeholder="(94) 91234-5678"
                   value={formData.whatsapp}
                   onChange={handleChange}
                 />
-                {errors.whatsapp ? <p className="form-erro">{errors.whatsapp}</p> : null}
+                {errors.whatsapp ? <p id="erro-whatsapp" className="form-erro">{errors.whatsapp}</p> : null}
               </div>
             </section>
 
@@ -276,6 +287,8 @@ export default function CheckoutPage() {
                   <input
                     id="f-cep"
                     name="cep"
+                    autoComplete="postal-code"
+                    {...accessibleField('cep')}
                     required
                     inputMode="numeric"
                     placeholder="00000-000"
@@ -283,7 +296,7 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     onBlur={buscarCEP}
                   />
-                  {errors.cep ? <p className="form-erro">{errors.cep}</p> : null}
+                  {errors.cep ? <p id="erro-cep" className="form-erro">{errors.cep}</p> : null}
                   {cepErro ? <p role="status">{cepErro}</p> : null}
                 </div>
                 <div className="form-grupo">
@@ -297,20 +310,20 @@ export default function CheckoutPage() {
               </div>
               <div className="form-grupo">
                 <label htmlFor="f-bairro">Bairro *</label>
-                <input id="f-bairro" name="bairro" required list="bairros-entrega" placeholder="Digite ou escolha seu bairro" value={formData.bairro} onChange={handleChange} />
+                <input id="f-bairro" name="bairro" required {...accessibleField('bairro')} list="bairros-entrega" placeholder="Digite ou escolha seu bairro" value={formData.bairro} onChange={handleChange} />
                 <datalist id="bairros-entrega">{LEYDE.bairrosEntrega.map((bairro) => <option key={bairro.nome} value={bairro.nome} />)}</datalist>
-                {errors.bairro ? <p className="form-erro">{errors.bairro}</p> : null}
+                {errors.bairro ? <p id="erro-bairro" className="form-erro">{errors.bairro}</p> : null}
               </div>
               <div className="form-col">
                 <div className="form-grupo">
                   <label htmlFor="f-rua">Rua *</label>
-                  <input id="f-rua" name="rua" required placeholder="Nome da rua" value={formData.rua} onChange={handleChange} />
-                  {errors.rua ? <p className="form-erro">{errors.rua}</p> : null}
+                  <input id="f-rua" name="rua" required autoComplete="address-line1" {...accessibleField('rua')} placeholder="Nome da rua" value={formData.rua} onChange={handleChange} />
+                  {errors.rua ? <p id="erro-rua" className="form-erro">{errors.rua}</p> : null}
                 </div>
                 <div className="form-grupo">
                   <label htmlFor="f-numero">Número *</label>
-                  <input id="f-numero" name="numero" required placeholder="Nº" value={formData.numero} onChange={handleChange} />
-                  {errors.numero ? <p className="form-erro">{errors.numero}</p> : null}
+                  <input id="f-numero" name="numero" required {...accessibleField('numero')} placeholder="Nº" value={formData.numero} onChange={handleChange} />
+                  {errors.numero ? <p id="erro-numero" className="form-erro">{errors.numero}</p> : null}
                 </div>
               </div>
               <div className="form-grupo">
@@ -334,9 +347,9 @@ export default function CheckoutPage() {
             </section>
 
             <section>
-              <h2 className="pg-titulo">3. Forma de pagamento</h2>
+              <h2 className="pg-titulo" id="titulo-pagamento">3. Forma de pagamento</h2>
               <div id="pagamento-area">
-                <div className="pagamento-opcoes" id="pag-opcoes">
+                <div className="pagamento-opcoes" id="pag-opcoes" role="radiogroup" aria-labelledby="titulo-pagamento">
                   {LEYDE.formasPagamento.map((forma) => (
                     <label key={forma}>
                       <input
@@ -354,14 +367,14 @@ export default function CheckoutPage() {
                 {errors.pagamento ? <p className="form-erro">{errors.pagamento}</p> : null}
                 {cartaoCredito ? <div className="form-grupo" style={{ marginTop: '16px' }}>
                   <label htmlFor="f-parcelas">Parcelamento no cartão de crédito</label>
-                  <select id="f-parcelas" name="parcelas" value={formData.parcelas} onChange={handleChange} aria-describedby="parcelas-ajuda">
+                  <select id="f-parcelas" name="parcelas" value={formData.parcelas} onChange={handleChange} aria-invalid={Boolean(errors.parcelas)} aria-describedby={`parcelas-ajuda${errors.parcelas ? ' erro-parcelas' : ''}`}>
                     <option value="1">{descricaoParcelas(total, 1)}</option>
                     <option value="2" disabled={!permiteDuasParcelas}>{permiteDuasParcelas ? descricaoParcelas(total, 2) : '2x indisponível para este valor'}</option>
                   </select>
                   <p id="parcelas-ajuda" style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '8px' }}>
                     Escolha 1x ou no máximo 2x. {total == null ? 'O valor de cada parcela depende da confirmação do frete.' : 'As parcelas incluem o frete informado acima.'}
                   </p>
-                  {errors.parcelas ? <p className="form-erro">{errors.parcelas}</p> : null}
+                  {errors.parcelas ? <p id="erro-parcelas" className="form-erro">{errors.parcelas}</p> : null}
                 </div> : null}
               </div>
             </section>

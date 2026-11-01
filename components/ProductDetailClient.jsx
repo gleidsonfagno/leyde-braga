@@ -75,7 +75,7 @@ export default function ProductDetailClient({ produto }) {
           </div>
           <div className="galeria-minis">
             {produto.imagens.map((imagem) => <button key={imagem.id} type="button" aria-label={`Ver ${imagem.alt || produto.nome}`} onClick={() => setMainImage(imagem.url)} style={{ border: 0, background: 'transparent' }}>
-              <ProductImage className={mainImage === imagem.url ? 'ativo' : ''} src={imagem.url} alt={imagem.alt || produto.nome} />
+              <ProductImage className={mainImage === imagem.url ? 'ativo' : ''} src={imagem.url} alt="" />
             </button>)}
           </div>
         </div>
@@ -91,9 +91,9 @@ export default function ProductDetailClient({ produto }) {
 
           {!indisponivel ? (
             <div className="qtd-linha">
-              <label>Quantidade</label>
+              <label htmlFor="q-input">Quantidade</label>
               <div className="qtd-stepper">
-                <button type="button" id="q-menos" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                <button type="button" id="q-menos" aria-label="Diminuir quantidade" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
                   −
                 </button>
                 <input
@@ -104,7 +104,7 @@ export default function ProductDetailClient({ produto }) {
                   max="99"
                   onChange={(event) => setQuantity(Math.min(99, Math.max(1, parseInt(event.target.value, 10) || 1)))}
                 />
-                <button type="button" id="q-mais" onClick={() => setQuantity(Math.min(99, quantity + 1))}>
+                <button type="button" id="q-mais" aria-label="Aumentar quantidade" onClick={() => setQuantity(Math.min(99, quantity + 1))}>
                   +
                 </button>
               </div>
@@ -140,18 +140,18 @@ export default function ProductDetailClient({ produto }) {
 
       <section className="p-abas">
         <div className="p-aba-titulos">
-          <button className={activeTab === 'descricao' ? 'ativo' : ''} data-aba="descricao" onClick={() => setActiveTab('descricao')}>
+          <button aria-expanded={activeTab === 'descricao'} aria-controls="painel-descricao" className={activeTab === 'descricao' ? 'ativo' : ''} data-aba="descricao" onClick={() => setActiveTab('descricao')}>
             Descrição
           </button>
-          <button className={activeTab === 'espec' ? 'ativo' : ''} data-aba="espec" onClick={() => setActiveTab('espec')}>
+          <button aria-expanded={activeTab === 'espec'} aria-controls="painel-especificacoes" className={activeTab === 'espec' ? 'ativo' : ''} data-aba="espec" onClick={() => setActiveTab('espec')}>
             Especificações
           </button>
         </div>
 
-        <div className="p-aba" data-painel="descricao" style={{ display: activeTab === 'descricao' ? '' : 'none' }}>
+        <div className="p-aba" id="painel-descricao" data-painel="descricao" hidden={activeTab !== 'descricao'}>
           {produto.descricao}
         </div>
-        <div className="p-aba" data-painel="espec" style={{ display: activeTab === 'espec' ? '' : 'none' }}>
+        <div className="p-aba" id="painel-especificacoes" data-painel="espec" hidden={activeTab !== 'espec'}>
           <table>
             <tbody>
               {specs.map(([key, value]) => (
