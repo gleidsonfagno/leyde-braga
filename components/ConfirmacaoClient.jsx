@@ -6,6 +6,7 @@ import { whatsappLink } from '../lib/config';
 import { formatarBRL, multiplicarPreco } from '../lib/money';
 import { formatarNumeroPedido, montarMensagemPedido } from '../lib/order';
 import { mapaLocalizacao } from '../lib/location';
+import { textoFretePedido, textoTotalPedido } from '../lib/delivery';
 
 export default function ConfirmacaoClient({ pedidoQuery }) {
   const [pedido, setPedido] = useState(null);
@@ -28,7 +29,6 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
     return formatarNumeroPedido(number);
   }, [pedido, pedidoQuery]);
 
-  const total = pedido?.total ?? null;
   const resumoItens = pedido?.itens || [];
   const mapa = mapaLocalizacao(pedido?.endereco?.localizacao);
 
@@ -83,11 +83,11 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
             </div>
             <div className="linha">
               <span>Entrega</span>
-              <span>{pedido.entrega == null ? 'a combinar' : formatarBRL(pedido.entrega)}</span>
+              <span>{textoFretePedido(pedido)}</span>
             </div>
             <div className="linha total">
               <span>Total</span>
-              <span>{total == null ? 'a definir' : formatarBRL(total)}</span>
+              <span>{textoTotalPedido(pedido)}</span>
             </div>
           </aside>
         ) : (

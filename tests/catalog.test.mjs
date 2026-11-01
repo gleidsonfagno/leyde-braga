@@ -114,5 +114,5 @@ test('valores monetários, subtotal e mensagem WhatsApp não fazem contas em pon
   const mensagem = montarMensagemPedido({ numero: 1, itens: [{ nome: 'Produto real', preco: '0.10', qtd: 3 }], subtotal: '0.30', entrega: null, total: null });
   assert.match(mensagem, /0,30/);
   assert.match(mensagem, /Entrega: a combinar/);
-  assert.match(mensagem, /Total: a definir/);
+  assert.match(mensagem, /Total: R\$\s0,30 \+ frete a confirmar/);
 });

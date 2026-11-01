@@ -1,14 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useCart } from '../../components/CartContext';
 import { useCartProducts } from '../../components/useCartProducts';
 import { LEYDE, whatsappLink } from '../../lib/config';
 import { montarMensagemPedido } from '../../lib/order';
-import { formatarBRL, multiplicarPreco, somarValores, subtotalCarrinho } from '../../lib/money';
+import { formatarBRL, multiplicarPreco, subtotalCarrinho } from '../../lib/money';
 import { normalizeText } from '../../lib/text';
 import DeliveryLocation from '../../components/DeliveryLocation';
+import { calcularFrete, mensagemFrete, resumoFrete, totalComFrete, textoTotalPedido } from '../../lib/delivery';
 
 function paymentIcon(label) {
   const key = normalizeText(label).replace(/[^a-z0-9]/g, '');
@@ -66,10 +67,8 @@ function paymentIcon(label) {
 export default function CheckoutPage() {
   const { cart, limpar, ready } = useCart();
   const { linhas, loading, error, recarregar, revalidar, indisponiveis } = useCartProducts(cart, ready);
-  const [entregaValor, setEntregaValor] = useState(0);
-  const [entregaNull, setEntregaNull] = useState(true);
-  const [entregaMsg, setEntregaMsg] = useState('Digite o CEP ou o bairro para calcular a entrega.');
-  const [entregaMsgColor, setEntregaMsgColor] = useState('var(--muted)');
+  const [cepErro, setCepErro] = useState('');
+  const cepConsulta = useRef(0);
   const [formData, setFormData] = useState({
     nome: '',
     whatsapp: '',
@@ -86,45 +85,20 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [localizacao, setLocalizacao] = useState(null);
 
-  const bairroCadastrado = (nomeBairro) => {
-    if (!nomeBairro) return null;
-    const normalized = normalizeText(nomeBairro);
-    return (LEYDE.bairrosEntrega || []).find((bairro) => normalizeText(bairro.nome) === normalized) || null;
-  };
-
-  const calcularEntrega = (bairro) => {
-    const bairroEncontrado = bairroCadastrado(bairro);
-    if (bairroEncontrado) {
-      setEntregaValor(bairroEncontrado.valor || 0);
-      setEntregaNull(false);
-      setEntregaMsg(`Bairro cadastrado: entrega ${bairroEncontrado.valor > 0 ? formatarBRL(bairroEncontrado.valor) : 'grátis'}.`);
-      setEntregaMsgColor('var(--success)');
-    } else if (bairro) {
-      setEntregaNull(true);
-      setEntregaValor(0);
-      setEntregaMsg('Este bairro não está no cadastro de entrega. Combinamos a entrega pelo WhatsApp.');
-      setEntregaMsgColor('var(--accent-2)');
-    } else {
-      setEntregaNull(true);
-      setEntregaValor(0);
-      setEntregaMsg('Digite o CEP ou o bairro para calcular a entrega.');
-      setEntregaMsgColor('var(--muted)');
-    }
-  };
-
-  useEffect(() => {
-    calcularEntrega(formData.bairro);
-  }, [formData.bairro]);
-
+  const frete = calcularFrete(formData);
   const subtotal = subtotalCarrinho(linhas);
   const temPrecos = linhas.every((linha) => linha.produto.preco != null);
+  const total = temPrecos ? totalComFrete(subtotal, frete) : null;
 
   const buscarCEP = async () => {
     const cep = formData.cep.replace(/\D/g, '');
     if (cep.length !== 8) return;
+    const consulta = ++cepConsulta.current;
+    setCepErro('');
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: AbortSignal.timeout(10000) });
       const data = await response.json();
+      if (consulta !== cepConsulta.current) return;
       if (!data.erro) {
         setLocalizacao(null);
         setFormData((previous) => ({
@@ -135,12 +109,10 @@ export default function CheckoutPage() {
           estado: data.uf || 'PA',
         }));
       } else {
-        setEntregaMsg('CEP não encontrado. Preencha o endereço manualmente.');
-        setEntregaMsgColor('var(--accent-2)');
+        setCepErro('CEP não encontrado. Preencha o endereço manualmente.');
       }
     } catch {
-      setEntregaMsg('Não foi possível consultar o CEP agora. Preencha manualmente.');
-      setEntregaMsgColor('var(--accent-2)');
+      if (consulta === cepConsulta.current) setCepErro('Não foi possível consultar o CEP agora. Preencha manualmente.');
     }
   };
 
@@ -148,6 +120,7 @@ export default function CheckoutPage() {
     const nextErrors = {};
     if (!formData.nome.trim()) nextErrors.nome = 'Informe seu nome.';
     if (!formData.whatsapp.trim()) nextErrors.whatsapp = 'Informe seu WhatsApp.';
+    if (formData.cep.replace(/\D/g, '').length !== 8) nextErrors.cep = 'Informe um CEP com 8 dígitos.';
     if (!formData.rua.trim()) nextErrors.rua = 'Informe a rua.';
     if (!formData.numero.trim()) nextErrors.numero = 'Informe o número.';
     if (!formData.bairro.trim()) nextErrors.bairro = 'Informe o bairro.';
@@ -158,6 +131,7 @@ export default function CheckoutPage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'cep') { cepConsulta.current++; setCepErro(''); }
     if (['cep', 'bairro', 'rua', 'numero', 'cidade', 'estado'].includes(name)) setLocalizacao(null);
     setFormData((previous) => ({ ...previous, [name]: value }));
     if (errors[name]) {
@@ -189,7 +163,6 @@ export default function CheckoutPage() {
     const nextOrder = previous + 1;
     window.localStorage.setItem('leyde_pedido_contador', String(nextOrder));
 
-    const entregaFinal = entregaNull ? null : entregaValor;
     const pedido = {
       numero: nextOrder,
       nome: formData.nome.trim(),
@@ -205,10 +178,11 @@ export default function CheckoutPage() {
         ...(localizacao ? { localizacao } : {}),
       },
       pagamento: formData.pagamento || 'a combinar',
-      entrega: entregaFinal,
+      entrega: frete.valor,
+      frete,
       itens: linhas.map((linha) => ({ slug: linha.produto.slug, nome: linha.produto.nome, qtd: linha.qtd, preco: linha.produto.preco })),
       subtotal,
-      total: temPrecos && entregaFinal != null ? somarValores(subtotal, entregaFinal) : null,
+      total,
       data: new Date().toISOString(),
     };
 
@@ -296,6 +270,8 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     onBlur={buscarCEP}
                   />
+                  {errors.cep ? <p className="form-erro">{errors.cep}</p> : null}
+                  {cepErro ? <p role="status">{cepErro}</p> : null}
                 </div>
                 <div className="form-grupo">
                   <label htmlFor="f-estado">Estado</label>
@@ -308,7 +284,8 @@ export default function CheckoutPage() {
               </div>
               <div className="form-grupo">
                 <label htmlFor="f-bairro">Bairro *</label>
-                <input id="f-bairro" name="bairro" required placeholder="Ex.: Centro" value={formData.bairro} onChange={handleChange} />
+                <input id="f-bairro" name="bairro" required list="bairros-entrega" placeholder="Digite ou escolha seu bairro" value={formData.bairro} onChange={handleChange} />
+                <datalist id="bairros-entrega">{LEYDE.bairrosEntrega.map((bairro) => <option key={bairro.nome} value={bairro.nome} />)}</datalist>
                 {errors.bairro ? <p className="form-erro">{errors.bairro}</p> : null}
               </div>
               <div className="form-col">
@@ -333,8 +310,8 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                 />
               </div>
-              <p id="entrega-msg" style={{ fontSize: '13px', color: entregaMsgColor, marginTop: '4px' }}>
-                {entregaMsg}
+              <p id="entrega-msg" role="status" style={{ fontSize: '13px', color: frete.tipo === 'gratis' ? 'var(--success)' : 'var(--muted)', marginTop: '4px' }}>
+                {mensagemFrete(frete)}
               </p>
               <DeliveryLocation
                 key={[formData.cep, formData.bairro, formData.rua, formData.numero, formData.cidade, formData.estado].join('|')}
@@ -384,11 +361,11 @@ export default function CheckoutPage() {
             </div>
             <div className="linha" id="linha-entrega">
               <span>Entrega</span>
-              <span id="r-entrega">{entregaNull ? 'consultar' : entregaValor > 0 ? formatarBRL(entregaValor) : 'Grátis'}</span>
+              <span id="r-entrega">{resumoFrete(frete)}</span>
             </div>
             <div className="linha total">
               <span>Total</span>
-              <span id="r-total">{temPrecos && !entregaNull ? formatarBRL(somarValores(subtotal, entregaValor)) : 'a combinar'}</span>
+              <span id="r-total">{textoTotalPedido({ total, subtotal })}</span>
             </div>
             <button type="submit" className="btn solid block" id="btn-confirmar" disabled={submitting}>
               {submitting ? 'Processando...' : 'Confirmar pedido'}
