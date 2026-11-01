@@ -56,7 +56,7 @@ next.config.mjs            Configuração do Next.js
 - O último pedido ainda é salvo no `localStorage`, apenas no navegador utilizado. Antes de montar a mensagem, o checkout revalida os produtos; alterações de preço ou retirada de itens exigem nova confirmação.
 - O checkout consulta o ViaCEP e prepara a mensagem de pedido para o WhatsApp.
 - O backend e o painel estão no repositório separado `leyde-braga-admin`. A API atual não fornece pedidos, taxas de entrega, formas de pagamento nem dados institucionais; esses recursos mantêm o fluxo/configuração local.
-- O estoque não faz parte da resposta pública: a vitrine mostra “Consulte disponibilidade”. Parcelamento, composição e modo de uso não são inventados quando ausentes da API. A galeria exibe todas as referências de imagens retornadas.
+- O estoque não faz parte da resposta pública: a vitrine mostra “Consulte disponibilidade”. Composição e modo de uso não são inventados quando ausentes da API. O checkout permite 1x ou 2x no cartão, conforme a regra da loja, e calcula os valores somente quando o frete é conhecido. A galeria exibe todas as referências de imagens retornadas.
 - O arquivo de exemplos não é importado pela aplicação e não serve como fallback quando a API falha. Falhas exibem mensagem e opção de tentar novamente, diferentes de uma busca sem resultados.
 
 ## Integração e segurança
@@ -67,7 +67,7 @@ As páginas consultam a API no servidor e usam `cache: 'no-store'`. Os links nã
 
 Esse fluxo não depende de CORS entre o navegador e a API externa. Para consumidores diretos da API, o projeto administrativo deve manter o domínio exato da vitrine em `CORS_ORIGINS`. A vitrine nunca envia cookies administrativos.
 
-Preços permanecem strings decimais. Somas e multiplicações usam centavos inteiros com `BigInt`; os resultados salvos e serializados continuam strings. O frete e o total permanecem a combinar quando não há taxa cadastrada.
+Preços permanecem strings decimais. Somas, multiplicações e divisão em parcelas usam centavos inteiros com `BigInt`; os resultados salvos e serializados continuam strings. O frete é grátis nos cinco bairros autorizados de Altamira; para os demais, a estimativa a partir de R$ 5,00 exige confirmação e não fecha o total. O checkout também oferece captura opcional de localização para ajudar na entrega.
 
 ## Testes
 

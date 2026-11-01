@@ -7,6 +7,7 @@ import { formatarBRL, multiplicarPreco } from '../lib/money';
 import { formatarNumeroPedido, montarMensagemPedido } from '../lib/order';
 import { mapaLocalizacao } from '../lib/location';
 import { textoFretePedido, textoTotalPedido } from '../lib/delivery';
+import { descreverPagamento } from '../lib/payment';
 
 export default function ConfirmacaoClient({ pedidoQuery }) {
   const [pedido, setPedido] = useState(null);
@@ -89,6 +90,7 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
               <span>Total</span>
               <span>{textoTotalPedido(pedido)}</span>
             </div>
+            <div className="linha"><span>Pagamento</span><span style={{ textAlign: 'right', maxWidth: '65%' }}>{descreverPagamento(pedido)}</span></div>
           </aside>
         ) : (
           <div className="confirmacao-box">

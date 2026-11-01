@@ -6,10 +6,11 @@ import { useCart } from '../../components/CartContext';
 import { useCartProducts } from '../../components/useCartProducts';
 import { LEYDE, whatsappLink } from '../../lib/config';
 import { montarMensagemPedido } from '../../lib/order';
-import { formatarBRL, multiplicarPreco, subtotalCarrinho } from '../../lib/money';
+import { centavos, formatarBRL, multiplicarPreco, subtotalCarrinho } from '../../lib/money';
 import { normalizeText } from '../../lib/text';
 import DeliveryLocation from '../../components/DeliveryLocation';
 import { calcularFrete, mensagemFrete, resumoFrete, totalComFrete, textoTotalPedido } from '../../lib/delivery';
+import { descricaoParcelas, descreverPagamento, dividirParcelas, ehCartaoCredito, parcelasDoPagamento } from '../../lib/payment';
 
 function paymentIcon(label) {
   const key = normalizeText(label).replace(/[^a-z0-9]/g, '');
@@ -80,6 +81,7 @@ export default function CheckoutPage() {
     numero: '',
     complemento: '',
     pagamento: LEYDE.formasPagamento[0] || '',
+    parcelas: '1',
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -89,6 +91,11 @@ export default function CheckoutPage() {
   const subtotal = subtotalCarrinho(linhas);
   const temPrecos = linhas.every((linha) => linha.produto.preco != null);
   const total = temPrecos ? totalComFrete(subtotal, frete) : null;
+  const cartaoCredito = ehCartaoCredito(formData.pagamento);
+  const permiteDuasParcelas = total == null || centavos(total) >= 2n;
+  let pagamentoResumo;
+  try { pagamentoResumo = descreverPagamento({ pagamento: formData.pagamento, parcelas: formData.parcelas, total }); }
+  catch { pagamentoResumo = 'Selecione uma opção válida de 1x ou 2x.'; }
 
   const buscarCEP = async () => {
     const cep = formData.cep.replace(/\D/g, '');
@@ -125,6 +132,10 @@ export default function CheckoutPage() {
     if (!formData.numero.trim()) nextErrors.numero = 'Informe o número.';
     if (!formData.bairro.trim()) nextErrors.bairro = 'Informe o bairro.';
     if (!formData.pagamento) nextErrors.pagamento = 'Selecione uma forma de pagamento.';
+    try {
+      const parcelas = parcelasDoPagamento(formData.pagamento, formData.parcelas);
+      if (cartaoCredito && total != null) dividirParcelas(total, parcelas);
+    } catch (error) { nextErrors.parcelas = error.message; }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -133,7 +144,7 @@ export default function CheckoutPage() {
     const { name, value } = event.target;
     if (name === 'cep') { cepConsulta.current++; setCepErro(''); }
     if (['cep', 'bairro', 'rua', 'numero', 'cidade', 'estado'].includes(name)) setLocalizacao(null);
-    setFormData((previous) => ({ ...previous, [name]: value }));
+    setFormData((previous) => ({ ...previous, [name]: value, ...(name === 'pagamento' ? { parcelas: '1' } : {}) }));
     if (errors[name]) {
       setErrors((previous) => ({ ...previous, [name]: '' }));
     }
@@ -178,6 +189,7 @@ export default function CheckoutPage() {
         ...(localizacao ? { localizacao } : {}),
       },
       pagamento: formData.pagamento || 'a combinar',
+      parcelas: parcelasDoPagamento(formData.pagamento, formData.parcelas),
       entrega: frete.valor,
       frete,
       itens: linhas.map((linha) => ({ slug: linha.produto.slug, nome: linha.produto.nome, qtd: linha.qtd, preco: linha.produto.preco })),
@@ -231,6 +243,7 @@ export default function CheckoutPage() {
       {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
       {errors.catalogo ? <p role="alert">{errors.catalogo}</p> : null}
       <form id="form-checkout" onSubmit={handleSubmit} noValidate>
+        <fieldset disabled={submitting} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <div className="pg-layout">
           <div>
             <section style={{ marginBottom: '26px' }}>
@@ -339,6 +352,17 @@ export default function CheckoutPage() {
                   ))}
                 </div>
                 {errors.pagamento ? <p className="form-erro">{errors.pagamento}</p> : null}
+                {cartaoCredito ? <div className="form-grupo" style={{ marginTop: '16px' }}>
+                  <label htmlFor="f-parcelas">Parcelamento no cartão de crédito</label>
+                  <select id="f-parcelas" name="parcelas" value={formData.parcelas} onChange={handleChange} aria-describedby="parcelas-ajuda">
+                    <option value="1">{descricaoParcelas(total, 1)}</option>
+                    <option value="2" disabled={!permiteDuasParcelas}>{permiteDuasParcelas ? descricaoParcelas(total, 2) : '2x indisponível para este valor'}</option>
+                  </select>
+                  <p id="parcelas-ajuda" style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '8px' }}>
+                    Escolha 1x ou no máximo 2x. {total == null ? 'O valor de cada parcela depende da confirmação do frete.' : 'As parcelas incluem o frete informado acima.'}
+                  </p>
+                  {errors.parcelas ? <p className="form-erro">{errors.parcelas}</p> : null}
+                </div> : null}
               </div>
             </section>
           </div>
@@ -367,12 +391,14 @@ export default function CheckoutPage() {
               <span>Total</span>
               <span id="r-total">{textoTotalPedido({ total, subtotal })}</span>
             </div>
+            <div className="linha"><span>Pagamento</span><span id="r-pagamento" style={{ textAlign: 'right', maxWidth: '65%' }}>{pagamentoResumo}</span></div>
             <button type="submit" className="btn solid block" id="btn-confirmar" disabled={submitting}>
               {submitting ? 'Processando...' : 'Confirmar pedido'}
             </button>
             <div className="aviso">Ao confirmar, você será encaminhado ao WhatsApp para finalizar a compra.</div>
           </aside>
         </div>
+        </fieldset>
       </form>
     </main>
   );
