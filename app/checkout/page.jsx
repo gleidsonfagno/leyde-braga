@@ -8,6 +8,7 @@ import { LEYDE, whatsappLink } from '../../lib/config';
 import { montarMensagemPedido } from '../../lib/order';
 import { formatarBRL, multiplicarPreco, somarValores, subtotalCarrinho } from '../../lib/money';
 import { normalizeText } from '../../lib/text';
+import DeliveryLocation from '../../components/DeliveryLocation';
 
 function paymentIcon(label) {
   const key = normalizeText(label).replace(/[^a-z0-9]/g, '');
@@ -83,6 +84,7 @@ export default function CheckoutPage() {
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [localizacao, setLocalizacao] = useState(null);
 
   const bairroCadastrado = (nomeBairro) => {
     if (!nomeBairro) return null;
@@ -124,6 +126,7 @@ export default function CheckoutPage() {
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await response.json();
       if (!data.erro) {
+        setLocalizacao(null);
         setFormData((previous) => ({
           ...previous,
           rua: data.logradouro || '',
@@ -155,6 +158,7 @@ export default function CheckoutPage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (['cep', 'bairro', 'rua', 'numero', 'cidade', 'estado'].includes(name)) setLocalizacao(null);
     setFormData((previous) => ({ ...previous, [name]: value }));
     if (errors[name]) {
       setErrors((previous) => ({ ...previous, [name]: '' }));
@@ -198,6 +202,7 @@ export default function CheckoutPage() {
         rua: formData.rua.trim(),
         numero: formData.numero.trim(),
         complemento: formData.complemento.trim(),
+        ...(localizacao ? { localizacao } : {}),
       },
       pagamento: formData.pagamento || 'a combinar',
       entrega: entregaFinal,
@@ -331,6 +336,11 @@ export default function CheckoutPage() {
               <p id="entrega-msg" style={{ fontSize: '13px', color: entregaMsgColor, marginTop: '4px' }}>
                 {entregaMsg}
               </p>
+              <DeliveryLocation
+                key={[formData.cep, formData.bairro, formData.rua, formData.numero, formData.cidade, formData.estado].join('|')}
+                value={localizacao}
+                onChange={setLocalizacao}
+              />
             </section>
 
             <section>

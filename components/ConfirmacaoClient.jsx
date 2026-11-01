@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { whatsappLink } from '../lib/config';
 import { formatarBRL, multiplicarPreco } from '../lib/money';
 import { formatarNumeroPedido, montarMensagemPedido } from '../lib/order';
+import { mapaLocalizacao } from '../lib/location';
 
 export default function ConfirmacaoClient({ pedidoQuery }) {
   const [pedido, setPedido] = useState(null);
@@ -29,6 +30,7 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
 
   const total = pedido?.total ?? null;
   const resumoItens = pedido?.itens || [];
+  const mapa = mapaLocalizacao(pedido?.endereco?.localizacao);
 
   const mensagem = useMemo(() => {
     if (!pedido) return 'Olá! Gostaria de confirmar meu pedido.';
@@ -66,6 +68,7 @@ export default function ConfirmacaoClient({ pedidoQuery }) {
         {pedido ? (
           <aside className="resumo">
             <h3>Resumo do pedido</h3>
+            {mapa ? <p><a href={mapa} target="_blank" rel="noopener noreferrer">Ver ponto de entrega no mapa</a></p> : null}
             {resumoItens.map((item) => (
               <div key={item.slug} className="linha">
                 <span>

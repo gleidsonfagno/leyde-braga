@@ -92,3 +92,5 @@ Na Vercel, configure `CATALOG_API_URL` para cada ambiente que precisar de outra 
 O resultado da auditoria está em [docs/estrutura-e-limpeza.md](docs/estrutura-e-limpeza.md).
 
 O resultado da integração está em [docs/integracao-api.md](docs/integracao-api.md).
+
+As funções de localização, entrega e pagamento do checkout estão documentadas em [docs/checkout.md](docs/checkout.md).
