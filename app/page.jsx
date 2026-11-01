@@ -7,9 +7,10 @@ import CatalogMessage from '../components/CatalogMessage';
 import { catalogApi, obterTaxonomias } from '../lib/catalog-api';
 
 export default async function HomePage() {
-  const taxonomias = await obterTaxonomias();
-  let catalogo;
-  try { catalogo = await catalogApi.produtos({ pageSize: 12 }); } catch { /* Estado de erro visível abaixo. */ }
+  const [taxonomias, catalogo] = await Promise.all([
+    obterTaxonomias(),
+    catalogApi.produtos({ pageSize: 12 }).catch(() => null),
+  ]);
 
   return (
     <main>

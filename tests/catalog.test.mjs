@@ -67,6 +67,31 @@ test('listas de marcas/categorias vêm da API e rejeitam respostas inválidas', 
   assert.equal('active' in taxonomias.marcas[0], false);
 });
 
+test('somente marcas e categorias usam cache curto; produtos e preços permanecem atuais', async () => {
+  const consultas = [];
+  const client = criarClienteCatalogo({ fetchImpl: async (url, init) => {
+    consultas.push({ caminho: url.pathname, init });
+    if (url.pathname.endsWith('brands')) return Response.json({ data: [produto.brand] });
+    if (url.pathname.endsWith('categories')) return Response.json({ data: [produto.category] });
+    if (url.pathname.endsWith('/produto-real')) return Response.json({ data: produto });
+    return Response.json({ data: [produto], pagination: { page: 1, pageSize: 20, total: 1 } });
+  } });
+  await client.taxonomias();
+  await client.produtos();
+  await client.produto('produto-real');
+  assert.equal(consultas.length, 4);
+  for (const { caminho, init } of consultas) {
+    assert.equal(init.credentials, 'omit');
+    if (caminho.endsWith('brands') || caminho.endsWith('categories')) {
+      assert.equal(init.cache, 'force-cache');
+      assert.deepEqual(init.next, { revalidate: 60 });
+    } else {
+      assert.equal(init.cache, 'no-store');
+      assert.equal(init.next, undefined);
+    }
+  }
+});
+
 test('uma falha transitória de leitura é repetida uma vez, sem repetir 404 ou entradas inválidas', async () => {
   let tentativas = 0;
   const client = criarClienteCatalogo({ fetchImpl: async () => {

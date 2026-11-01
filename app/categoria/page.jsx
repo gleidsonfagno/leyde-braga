@@ -1,12 +1,29 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+import Loading from '../loading';
 import ProductCard from '../../components/ProductCard';
 import { catalogApi, obterTaxonomias } from '../../lib/catalog-api';
 import { categoriaHref as buildHref, filtrosDoCatalogo } from '../../lib/catalog';
 import CatalogMessage from '../../components/CatalogMessage';
 
+function Chip({ href, label, active }) {
+  return (
+    <Link prefetch={false} className={`chip${active ? ' ativo' : ''}`} href={href}>
+      {label}
+    </Link>
+  );
+}
+
 export default async function CategoriaPage({ searchParams }) {
+  const params = await searchParams || {};
+  return <Suspense key={JSON.stringify([params.cat, params.marca, params.q, params.page])} fallback={<Loading />}>
+    <CatalogoCategorias params={params} />
+  </Suspense>;
+}
+
+async function CatalogoCategorias({ params }) {
   const taxonomias = await obterTaxonomias();
-  const filtros = filtrosDoCatalogo(await searchParams || {}, taxonomias);
+  const filtros = filtrosDoCatalogo(params, taxonomias);
   const { categoria: catAtual, marca: marcaAtual, q, page } = filtros;
   let catalogo;
   try { catalogo = await catalogApi.produtos(filtros); } catch { /* Falha não é catálogo vazio. */ }
@@ -32,31 +49,29 @@ export default async function CategoriaPage({ searchParams }) {
         {titulo}
       </h1>
 
-      <details className="catalog-filters">
-        <summary>
-          Filtrar produtos
-          {catAtual && marcaAtual ? <span className="catalog-filters-current">Marca: {taxonomias.marcas.find((marca) => marca.slug === marcaAtual)?.nome || marcaAtual}</span> : null}
-        </summary>
-        <form key={buildHref(catAtual, marcaAtual, q)} action="/categoria" method="get" className="catalog-filters-form" aria-label="Filtros de produtos">
-          {q ? <input type="hidden" name="q" value={q} /> : null}
-          <div className="form-grupo">
-            <label htmlFor="catalog-category">Categoria</label>
-            <select id="catalog-category" name="cat" defaultValue={catAtual}>
-              <option value="">Todas as categorias</option>
-              {taxonomias.categorias.map((categoria) => <option key={categoria.id} value={categoria.slug}>{categoria.nome}</option>)}
-            </select>
-          </div>
-          <div className="form-grupo">
-            <label htmlFor="catalog-brand">Marca</label>
-            <select id="catalog-brand" name="marca" defaultValue={marcaAtual}>
-              <option value="">Todas as marcas</option>
-              {taxonomias.marcas.map((marca) => <option key={marca.id} value={marca.slug}>{marca.nome}</option>)}
-            </select>
-          </div>
-          <button className="btn solid" type="submit">Aplicar filtros</button>
-          {catAtual || marcaAtual ? <Link prefetch={false} className="catalog-filters-clear" href={buildHref('', '', q)}>Limpar filtros</Link> : null}
-        </form>
-      </details>
+      <div className="filtros" id="filtros-cat">
+        <Chip href={buildHref('', marcaAtual, q)} label="Todas" active={!catAtual && !marcaAtual && !q} />
+        {taxonomias.categorias.map((categoria) => (
+          <Chip
+            key={categoria.id}
+            href={buildHref(categoria.slug, marcaAtual, q)}
+            label={categoria.nome}
+            active={catAtual === categoria.slug}
+          />
+        ))}
+      </div>
+
+      <div className="filtros" id="filtros-marca">
+        <Chip href={buildHref(catAtual, '', q)} label="Todas as marcas" active={!marcaAtual} />
+        {taxonomias.marcas.map((marca) => (
+          <Chip
+            key={marca.id}
+            href={buildHref(catAtual, marca.slug, q)}
+            label={marca.nome}
+            active={marcaAtual === marca.slug}
+          />
+        ))}
+      </div>
 
       <div id="contador" style={{ fontSize: '13px', color: 'var(--muted-2)', marginBottom: '14px' }}>
         {catalogo ? `${total} ${total === 1 ? 'produto' : 'produtos'}` : 'Catálogo temporariamente indisponível'}

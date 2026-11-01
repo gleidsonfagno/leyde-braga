@@ -3,7 +3,8 @@ import PageShell from '../components/PageShell';
 import Providers from './providers';
 import { obterTaxonomias } from '../lib/catalog-api';
 
-export const dynamic = 'force-dynamic';
+// Renderização por pedido, preservando o cache explícito de marcas e categorias.
+export const revalidate = 0;
 
 export const metadata = {
   title: 'LEYDE BRAGA — Perfumaria e Cosméticos em Altamira/PA',

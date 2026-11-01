@@ -66,16 +66,3 @@
 :root {
   --script: 'Playfair Display', Georgia, serif;
 }
-
-.catalog-filters { margin-bottom: 18px; }
-.catalog-filters summary { width: fit-content; cursor: pointer; font-size: 13px; font-weight: 500; padding: 8px 0; }
-.catalog-filters-current { margin-left: 16px; color: var(--muted); font-weight: 400; }
-.catalog-filters-form { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; padding: 14px 0 4px; }
-.catalog-filters-form .form-grupo { flex: 1 1 200px; max-width: 300px; min-width: 0; margin-bottom: 0; }
-.catalog-filters-form .btn { min-height: 44px; }
-.catalog-filters-clear { font-size: 13px; padding: 12px 0; text-decoration: underline; }
-
-@media (max-width: 600px) {
-  .catalog-filters-form .form-grupo { flex-basis: 100%; max-width: none; }
-  .catalog-filters-current { display: block; margin-left: 0; }
-}

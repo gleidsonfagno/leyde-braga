@@ -35,13 +35,13 @@ export default function Navigation({ categorias, marcas }) {
   return (
     <nav className="site-nav" aria-label="Categorias" ref={dropdownRef}>
       <div className="container">
-        <Link prefetch={false} href="/">Início</Link>
+        <Link href="/">Início</Link>
         {categoriasPrincipais(categorias).map((categoria) => (
-          <Link prefetch={false} key={categoria.id} href={`/categoria?cat=${categoria.slug}`}>
+          <Link key={categoria.id} href={`/categoria?cat=${categoria.slug}`}>
             {categoria.nome}
           </Link>
         ))}
-        <Link prefetch={false} href="/categoria">Todos os produtos</Link>
+        <Link href="/categoria">Todos os produtos</Link>
         <span
           className={`has-sub ${isOpen ? 'aberto' : ''}`}
           role="button"
