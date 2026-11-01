@@ -15,11 +15,18 @@ export function PrivacyProvider({ children }) {
   const [preferences, setPreferences] = useState(null);
   const [privacySignal, setPrivacySignal] = useState(false);
   const [open, setOpen] = useState(false);
+  const [intro, setIntro] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [notice, setNotice] = useState('');
   const dialog = useRef(null);
   const tracker = useRef(null);
+  const dismissed = useRef(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const informationPage = ['/privacidade', '/termos-de-uso', '/cookies', '/acessibilidade', '/direitos-autorais', '/entregas-e-pagamentos', '/trocas-e-devolucoes'].includes(pathname);
+    if (ready && !preferences && !dismissed.current && !informationPage) { setIntro(true); setOpen(true); }
+  }, [ready, preferences, pathname]);
 
   useEffect(() => {
     const carregar = () => {
@@ -49,11 +56,15 @@ export function PrivacyProvider({ children }) {
     return () => clearTimeout(timer);
   }, [preferences]);
   useEffect(() => {
-    if (open && !dialog.current.open) dialog.current.showModal();
+    if (open) {
+      if (!dialog.current.open) dialog.current.showModal();
+      dialog.current.querySelector('h2')?.focus();
+    }
     if (!open && dialog.current.open) dialog.current.close();
-  }, [open]);
+  }, [open, intro]);
 
-  const configure = () => { setAnalytics(Boolean(preferences?.analytics && !privacySignal)); setOpen(true); };
+  const close = () => { dismissed.current = true; setOpen(false); };
+  const configure = () => { setAnalytics(Boolean(preferences?.analytics && !privacySignal)); setIntro(false); setOpen(true); };
   const save = (value) => {
     const next = criarPreferencias(Boolean(value && !privacySignal));
     // Revogação interrompe a coleta antes de atualizar a interface.
@@ -61,47 +72,47 @@ export function PrivacyProvider({ children }) {
     setPreferences(next);
     try { window.localStorage.setItem(PRIVACY_KEY, JSON.stringify(next)); setNotice('Preferências salvas.'); }
     catch { setNotice('Preferência aplicada somente nesta sessão: o navegador bloqueou o armazenamento.'); }
-    setOpen(false);
+    close();
   };
 
   return <PrivacyContext.Provider value={{ ready, preferences, configure, save }}>
     {children}
     <span className="sr-only" role="status">{notice}</span>
-    <dialog ref={dialog} className="privacy-dialog" aria-labelledby="privacy-title" onCancel={() => setOpen(false)} onClose={() => setOpen(false)} onKeyDown={(event) => {
+    <dialog ref={dialog} className="privacy-dialog" aria-labelledby="privacy-title" onCancel={close} onClose={close} onKeyDown={(event) => {
       if (event.key !== 'Tab') return;
       const controls = Array.from(event.currentTarget.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), [tabindex="0"]'));
       const first = controls[0];
       const last = controls.at(-1);
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      const outsideSequence = !controls.includes(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || outsideSequence)) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || outsideSequence)) { event.preventDefault(); first?.focus(); }
     }}>
-      <h2 id="privacy-title">Preferências de privacidade</h2>
+      <h2 id="privacy-title" tabIndex={-1}>{intro ? 'Sua privacidade' : 'Preferências de privacidade'}</h2>
+      {intro ? <>
+        <p>Usamos armazenamento necessário para manter seu carrinho e o último pedido neste navegador.</p>
+        <p>{GA_ID ? 'Estatísticas são opcionais e só serão ativadas se você permitir.' : 'Não há rastreadores de estatísticas ou publicidade ativos.'}</p>
+        <p>Conheça nossa <Link prefetch={false} href="/privacidade" onClick={close}>Política de privacidade</Link>, os <Link prefetch={false} href="/termos-de-uso" onClick={close}>Termos do catálogo</Link> e a <Link prefetch={false} href="/cookies" onClick={close}>Política de cookies</Link>.</p>
+        <div className="privacy-actions">
+          <button type="button" className="btn solid" onClick={() => save(false)}>Continuar com necessários</button>
+          {GA_ID ? <button type="button" className="btn solid" onClick={() => save(true)}>Aceitar estatísticas</button> : null}
+          <button type="button" className="btn" onClick={configure}>Configurar preferências</button>
+          <button type="button" className="btn" onClick={close}>Fechar sem escolher</button>
+        </div>
+      </> : <>
       <p>O carrinho, o pedido local e sua escolha de privacidade são recursos necessários. Eles não dependem de aceitar estatísticas.</p>
       <label className="privacy-option"><input type="checkbox" checked readOnly disabled /> Armazenamento necessário</label>
       <label className="privacy-option"><input type="checkbox" checked={analytics} disabled={!GA_ID || privacySignal} onChange={(event) => setAnalytics(event.target.checked)} /> Estatísticas opcionais de visitas</label>
       <p>{GA_ID ? 'Com sua permissão, o Google Analytics recebe páginas visitadas sem os campos do pedido. Publicidade e Google Signals ficam desativados.' : 'Nenhuma ferramenta de estatísticas ou publicidade está configurada neste catálogo.'}</p>
       {privacySignal ? <p>Seu navegador sinalizou preferência por não rastrear; estatísticas permanecem desativadas.</p> : null}
-      <p><Link prefetch={false} href="/cookies" onClick={() => setOpen(false)}>Leia a política de cookies e armazenamento</Link>.</p>
+      <p><Link prefetch={false} href="/cookies" onClick={close}>Leia a política de cookies e armazenamento</Link>.</p>
       <div className="privacy-actions">
         <button type="button" className="btn" onClick={() => save(false)}>Rejeitar opcionais</button>
         <button type="button" className="btn" onClick={() => save(analytics)}>Salvar preferências</button>
-        <button type="button" className="btn" onClick={() => setOpen(false)}>Fechar</button>
+        <button type="button" className="btn" onClick={close}>Fechar</button>
       </div>
+      </>}
     </dialog>
   </PrivacyContext.Provider>;
-}
-
-export function PrivacyNotice() {
-  const { ready, preferences, configure, save } = useContext(PrivacyContext);
-  if (!ready || preferences) return null;
-  return <section className="privacy-notice container" aria-label="Aviso de cookies e privacidade">
-    <p><strong>Sua privacidade</strong> — usamos armazenamento necessário para o carrinho e o pedido neste navegador. {GA_ID ? 'Estatísticas opcionais só serão ativadas com sua permissão.' : 'Não usamos rastreadores de publicidade ou estatísticas.'} <Link prefetch={false} href="/cookies">Saiba mais</Link>.</p>
-    <div className="privacy-actions">
-      <button type="button" className="btn" onClick={() => save(false)}>Somente necessários</button>
-      {GA_ID ? <button type="button" className="btn" onClick={() => save(true)}>Aceitar estatísticas</button> : null}
-      <button type="button" className="btn" onClick={configure}>Configurar privacidade</button>
-    </div>
-  </section>;
 }
 
 export function PrivacySettingsButton() {

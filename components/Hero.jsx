@@ -2,33 +2,31 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { categoriasPrincipais } from '../lib/catalog';
+import ProductImage from './ProductImage';
 
-const slides = [
-  { id: 'hero-perfumaria', tema: 'perfumaria', titulo: 'Uma fragrância para cada momento', detalhe: 'Conheça nossa seleção de perfumes', destino: 0 },
-  { id: 'hero-corpo-banho', tema: 'corpo', titulo: 'Seu momento de cuidado', detalhe: 'Descubra cuidados para o corpo e banho', destino: 1 },
-  { id: 'hero-maquiagem', tema: 'maquiagem', titulo: 'Beleza do seu jeito', detalhe: 'Explore os produtos de maquiagem', destino: 3 },
-];
-
-export default function Hero({ categorias }) {
-  const principais = categoriasPrincipais(categorias);
+export default function Hero({ produtos }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const active = currentSlide < produtos.length ? currentSlide : 0;
+  if (!produtos.length) return null;
   return <section className="hero container" aria-label="Destaques do catálogo" aria-roledescription="carrossel">
-    <div className="hero-window"><div className="hero-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-      {slides.map((slide, index) => {
-        const destino = principais[slide.destino];
-        return <div key={slide.id} className="hero-slide" aria-hidden={index !== currentSlide} inert={index !== currentSlide ? true : undefined}>
-          <Link prefetch={false} className={`original-banner tema-${slide.tema}`} href={destino ? `/categoria?cat=${destino.slug}` : '/categoria'} tabIndex={index === currentSlide ? 0 : -1}>
-            <span className="banner-eyebrow">LEYDE BRAGA · BELEZA & PERFUMARIA</span>
-            <span className="banner-title">{slide.titulo}</span>
-            <span className="banner-detail">{slide.detalhe}</span>
-            <span className="banner-cta">Ver produtos →</span>
+    <div className="hero-window"><div className="hero-track" style={{ transform: `translateX(-${active * 100}%)` }}>
+      {produtos.map((produto, index) => {
+        return <div key={produto.slug} className="hero-slide" aria-hidden={index !== active} inert={index !== active ? true : undefined}>
+          <Link prefetch={false} className="catalog-banner" href={`/produto?p=${produto.slug}`} tabIndex={index === active ? 0 : -1}>
+            <span className="banner-copy">
+              <span className="banner-eyebrow">LEYDE BRAGA · BELEZA & PERFUMARIA</span>
+              <span className="banner-title">Uma fragrância para cada momento</span>
+              <span className="banner-detail">{produto.nome}</span>
+              <span className="banner-brand">{produto.marca}</span>
+              <span className="banner-cta">Conhecer perfume →</span>
+            </span>
+            <span className="banner-product"><ProductImage src={produto.imagem} alt={produto.alt} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'low'} /></span>
           </Link>
         </div>;
       })}
     </div></div>
     <div className="hero-dots">
-      {slides.map((slide, index) => <button key={slide.id} type="button" aria-label={`Mostrar destaque ${index + 1}: ${slide.detalhe}`} aria-pressed={index === currentSlide} className={index === currentSlide ? 'ativo' : ''} onClick={() => setCurrentSlide(index)} />)}
+      {produtos.length > 1 ? produtos.map((produto, index) => <button key={produto.slug} type="button" aria-label={`Mostrar destaque ${index + 1}: ${produto.nome}`} aria-pressed={index === active} className={index === active ? 'ativo' : ''} onClick={() => setCurrentSlide(index)} />) : null}
     </div>
   </section>;
 }

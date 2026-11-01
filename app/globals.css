@@ -89,9 +89,8 @@ input::placeholder, textarea::placeholder { color: #626466; opacity: 1; }
 .policy-page { max-width: 900px; padding-bottom: 35px; overflow-wrap: anywhere; }
 .policy-page p { margin: 12px 0; line-height: 1.8; font-size: 15px; }
 .policy-page h2 { font-size: 21px; margin-top: 28px; }
-.policy-page a, .privacy-notice a, .privacy-dialog a { text-decoration: underline; }
+.policy-page a, .privacy-dialog a { text-decoration: underline; }
 .policy-date { color: var(--muted); font-size: 13px !important; }
-.privacy-notice { padding-top: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); font-size: 13px; }
 .privacy-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .privacy-actions .btn { min-height: 44px; }
 .privacy-dialog { margin: auto; width: min(600px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 24px; overflow-y: auto; border: 1px solid #767676; border-radius: var(--radius); color: var(--fg); background: var(--bg); }
@@ -103,28 +102,31 @@ input::placeholder, textarea::placeholder { color: #626466; opacity: 1; }
 .privacy-data { border-top: 1px solid var(--border); margin-top: 28px; }
 .checkout-privacy { font-size: 13px; color: var(--muted); margin: 0 0 20px; }
 .checkout-privacy a { text-decoration: underline; }
-.original-banner { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 360px; padding: 55px 8%; color: #fff; position: relative; isolation: isolate; overflow: hidden; }
+.catalog-banner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; align-items: center; min-height: 390px; padding: 38px 7% 58px; color: var(--fg); background: #f5f5f5; }
+.catalog-banner:hover { color: var(--fg); }
+.banner-copy { display: flex; flex-direction: column; align-items: flex-start; }
+.banner-product { display: flex; align-items: center; justify-content: center; background: #fff; border-radius: var(--radius); padding: 16px; }
+.banner-product img { width: 100%; height: 290px; object-fit: contain; }
+.banner-brand { margin-top: 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .hero-window { overflow: hidden; }
-.tema-perfumaria { background: #27221e; }
-.tema-corpo { background: #34403b; }
-.tema-cabelos { background: #3e3744; }
-.tema-maquiagem { background: #4d303d; }
-.original-banner::before, .original-category::before { content: ''; position: absolute; width: 350px; height: 350px; right: -100px; top: -100px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; pointer-events: none; z-index: -1; }
-.original-banner:hover { color: #fff; }
 .banner-eyebrow { font-size: 11px; letter-spacing: .18em; }
 .banner-title { font-family: var(--display); font-size: clamp(26px, 3.8vw, 46px); line-height: 1.2; margin: 16px 0; max-width: 650px; }
 .banner-detail { font-size: 15px; }
 .banner-cta { margin-top: 22px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; text-decoration: underline; }
-.original-category { min-height: 290px; display: grid; place-items: center; isolation: isolate; }
-.category-monogram { font-family: var(--display); font-size: 72px; color: #fff; }
-.original-category .cat-nome { background: rgba(0,0,0,.75); }
+.product-category { display: flex; flex-direction: column; background: #fff; }
+.category-photo { display: grid; place-items: center; padding: 16px; background: #f5f5f5; }
+.product-category img { height: 230px; width: 100%; object-fit: contain; }
+.product-category .cat-nome { position: static; padding: 16px 8px; background: #fff; color: #000; font-size: 15px; }
+.category-no-photo { display: grid; place-items: center; min-height: 230px; font-size: 13px; color: var(--muted); text-align: center; }
 .hero-dots { background: #000; border-radius: 30px; }
 .hero-dots button { width: 24px; height: 24px; background: #fff; border-color: #fff; }
 .hero-dots button:hover { background: #ddd; }
 .hero-dots button.ativo { width: 24px; }
 @media (max-width: 768px) {
   html { scroll-padding-top: 190px; }
-  .original-banner { min-height: 300px; padding: 35px 25px 65px; }
-  .original-category { min-height: 220px; }
+  .catalog-banner { grid-template-columns: 1fr; gap: 20px; min-height: 0; padding: 28px 24px 64px; }
+  .banner-product img { height: 220px; }
+  .product-category img { height: 170px; }
+  .category-no-photo { min-height: 170px; }
   .dropdown { position: fixed; top: auto; left: 16px; right: 16px; transform: none; max-height: 60vh; overflow-y: auto; }
 }

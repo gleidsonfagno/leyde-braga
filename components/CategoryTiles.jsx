@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { categoriasPrincipais } from '../lib/catalog';
+import ProductImage from './ProductImage';
 
 export default function CategoryTiles({ categorias }) {
   if (!categorias.length) return null;
@@ -11,14 +11,14 @@ export default function CategoryTiles({ categorias }) {
           <h2>O que você procura</h2>
         </div>
         <div className="grid-cat" id="grid-categorias">
-          {categoriasPrincipais(categorias).map((categoria) => (
+          {categorias.map((categoria) => (
             <Link prefetch={false}
               key={categoria.id}
-              className={`cat-tile original-category tema-${categoria.tema}`}
+              className="cat-tile product-category"
               data-od-id={`categoria-${categoria.id}`}
-              href={`/categoria?cat=${categoria.slug}`}
+              href={`/categoria?cat=${categoria.categoriaDestino}`}
             >
-              <span className="category-monogram" aria-hidden="true">LB</span>
+              <span className="category-photo">{categoria.imagem ? <ProductImage loading="lazy" src={categoria.imagem} alt="" /> : <span className="category-no-photo">Foto ainda não disponível</span>}</span>
               <span className="cat-nome">{categoria.nome}</span>
             </Link>
           ))}

@@ -3,7 +3,6 @@ import Header from './Header';
 import Navigation from './Navigation';
 import Topbar from './Topbar';
 import CatalogMessage from './CatalogMessage';
-import { PrivacyNotice } from './PrivacyControls';
 
 export default function PageShell({ children, categorias, marcas, erroCatalogo }) {
   return (
@@ -12,7 +11,6 @@ export default function PageShell({ children, categorias, marcas, erroCatalogo }
       <Topbar />
       <Header />
       <Navigation categorias={categorias} marcas={marcas} />
-      <PrivacyNotice />
       {erroCatalogo ? <CatalogMessage erro>Não foi possível carregar as marcas e categorias. Tente novamente em instantes.</CatalogMessage> : null}
       <div id="conteudo-principal" tabIndex={-1}>{children}</div>
       <Footer categorias={categorias} />
