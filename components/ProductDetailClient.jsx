@@ -5,13 +5,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LEYDE, whatsappLink } from '../lib/config';
 import { estoqueLabel } from '../lib/catalog';
-import { centavos, formatarBRL } from '../lib/money';
-import { descricaoParcelas, MAX_PARCELAS_CARTAO } from '../lib/payment';
+import { formatarBRL } from '../lib/money';
 import ProductImage from './ProductImage';
 import { useCart } from './CartContext';
 import { useToast } from './ToastContext';
 
-export default function ProductDetailClient({ produto }) {
+export default function ProductDetailClient({ produto, children }) {
   const router = useRouter();
   const { adicionar } = useCart();
   const { showToast } = useToast();
@@ -32,7 +31,6 @@ export default function ProductDetailClient({ produto }) {
   const estoque = useMemo(() => (produto ? estoqueLabel(produto) : null), [produto]);
   const indisponivel = produto?.disponibilidade === 'indisponivel';
   const preco = produto ? formatarBRL(produto.preco) : '';
-  const parcelamento = produto ? descricaoParcelas(produto.preco, centavos(produto.preco) >= BigInt(MAX_PARCELAS_CARTAO) ? MAX_PARCELAS_CARTAO : 1) : '';
 
   if (!produto) {
     return (
@@ -87,15 +85,6 @@ export default function ProductDetailClient({ produto }) {
           <h1>{produto.nome}</h1>
           {estoque ? <p className={`p-est ${estoque.cls}`}>{estoque.txt}</p> : null}
           <p className="p-preco">{preco}</p>
-          {!indisponivel ? <div className="p-parcela">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" focusable="false">
-              <rect x="2" y="4" width="20" height="16" rx="3" />
-              <path d="M2 9h20M6 15h4" />
-            </svg>
-            <p><strong>{parcelamento}</strong> no cartão de crédito
-              <small>Por unidade, sem incluir o frete. Escolha as parcelas no checkout.</small>
-            </p>
-          </div> : null}
           <p className="p-resumo" style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '12px' }}>
             {produto.descricao}
           </p>
@@ -179,6 +168,7 @@ export default function ProductDetailClient({ produto }) {
           </table>
         </div>
       </section>
+      {children}
     </main>
   );
 }

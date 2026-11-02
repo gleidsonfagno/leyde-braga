@@ -12,7 +12,8 @@ API utilizada: `https://leyde-braga-admin.vercel.app/api/v1`.
 - O catálogo tinha 28 produtos públicos, sete marcas ativas e 16 categorias ativas no momento da verificação. Esses números não estão fixados na aplicação.
 - A navegação principal mantém quatro categorias de apresentação; o catálogo disponibiliza todos os filtros retornados pela API.
 - As duas vitrines da página inicial mostram os primeiros 12 produtos da listagem da API. Não é atribuído um campo de destaque inexistente no backend.
-- Composição, modo de uso e estoque não são simulados. O contrato público atual não fornece esses campos. O parcelamento em até 2x foi autorizado pela loja e é apresentado no detalhe e escolhido no checkout, conforme `docs/checkout.md`.
+- Composição, modo de uso e estoque não são simulados. O contrato público atual não fornece esses campos. O parcelamento em até 2x foi autorizado pela loja e é escolhido somente no checkout, conforme `docs/checkout.md`.
+- O detalhe mostra até quatro produtos relacionados da mesma categoria, excluindo o produto atual e duplicações. Uma única consulta de até cinco produtos usa o cache de exibição. A seção carrega separadamente em Suspense, sem aguardar as recomendações para apresentar o produto principal. Sem alternativas ou em falha da consulta, a seção fica oculta.
 - O catálogo de exemplo permanece em `lib/products.js` como referência histórica, sem importação pela aplicação ou fallback automático.
 - CSS, fontes, banners e configurações de imagem foram preservados. Imagens de produtos vêm das URLs da API, com alternativa visual neutra quando ausentes ou indisponíveis.
 - Pedidos e atendimento seguem pelo WhatsApp. Não foi criada uma rota de pedidos nem um processamento de pagamento.
