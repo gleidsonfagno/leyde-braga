@@ -1,4 +1,3 @@
-import BrandsBar from '../components/BrandsBar';
 import CategoryTiles from '../components/CategoryTiles';
 import Hero from '../components/Hero';
 import Shelf from '../components/Shelf';
@@ -27,7 +26,6 @@ export default async function HomePage() {
           <Link prefetch={false} className="btn" href="/categoria">Ver todos os produtos</Link>
         </div>
       </>}
-      <BrandsBar marcas={taxonomias.marcas} />
     </main>
   );
 }
