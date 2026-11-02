@@ -111,14 +111,14 @@ export default function ProductDetailClient({ produto, children }) {
                 </button>
               </div>
             </div>
-            <p className="p-quantidade-ajuda" id="quantidade-ajuda">Escolha quantas unidades deseja. A disponibilidade será confirmada pelo WhatsApp.</p>
+            <p className="p-quantidade-ajuda" id="quantidade-ajuda">Escolha quantas unidades deseja. {produto.disponibilidade === 'disponivel' ? 'O estoque será conferido novamente na finalização do pedido.' : 'Confirme a disponibilidade pelo WhatsApp.'}</p>
             </>
           ) : null}
 
           <div className="p-botoes">
             {indisponivel ? (
               <button className="btn block" disabled style={{ justifyContent: 'center' }}>
-                Produto indisponível
+                Produto esgotado
               </button>
             ) : (
               <>

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { adaptarProduto, filtrosDoCatalogo, categoriaHref } from '../lib/catalog.js';
+import { adaptarProduto, filtrosDoCatalogo, categoriaHref, estoqueLabel } from '../lib/catalog.js';
 import { criarClienteCatalogo, CatalogApiError } from '../lib/catalog-api.js';
 import { normalizarCarrinho, itensDoCarrinho } from '../lib/cart.js';
 import { somarValores, multiplicarPreco, formatarBRL, subtotalCarrinho } from '../lib/money.js';
@@ -28,6 +28,26 @@ test('campos privados são descartados, imagens seguras ordenadas e preço decim
   assert.equal(mapped.disponibilidade, 'sob-consulta');
   assert.equal(adaptarProduto({ ...produto, images: [] }).imagem, '/assets/images/product-placeholder.svg');
   assert.throws(() => adaptarProduto({ ...produto, price: 0.1 }));
+});
+
+test('disponibilidade usa somente o booleano público, sem inferir pelo estoque privado', () => {
+  assert.equal(adaptarProduto({ ...produto, inStock: true, stock: 0 }).disponibilidade, 'disponivel');
+  assert.equal(adaptarProduto({ ...produto, inStock: false, stock: 999 }).disponibilidade, 'indisponivel');
+  for (const inStock of [undefined, null, 'true', 'false', 1, 0]) {
+    assert.equal(adaptarProduto({ ...produto, inStock }).disponibilidade, 'sob-consulta');
+  }
+});
+
+test('rótulos diferenciam em estoque, esgotado e ausência de informação', () => {
+  assert.deepEqual(estoqueLabel({ disponibilidade: 'disponivel' }), { txt: 'Em estoque', cls: 'est-disponivel' });
+  assert.deepEqual(estoqueLabel({ disponibilidade: 'indisponivel' }), { txt: 'Esgotado', cls: 'est-indisponivel' });
+  assert.equal(estoqueLabel({}).txt, 'Disponibilidade a confirmar');
+});
+
+test('produto que esgota entre consultas sai dos itens atuais do pedido', () => {
+  const cart = [{ slug: produto.slug, qtd: 2 }];
+  assert.equal(itensDoCarrinho(cart, [adaptarProduto({ ...produto, inStock: true })]).length, 1);
+  assert.deepEqual(itensDoCarrinho(cart, [adaptarProduto({ ...produto, inStock: false })]), []);
 });
 
 test('transporta paginação/busca/filtros reais sem cookies, cache ou campos extras', async () => {

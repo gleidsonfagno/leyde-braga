@@ -38,7 +38,7 @@ export default function ProductCard({ produto }) {
       <div className="btns">
         {indisponivel ? (
           <button className="btn block" disabled>
-            Indisponível
+            Esgotado
           </button>
         ) : (
           <button className="btn solid block" data-add-carrinho={produto.slug} data-od-id={`add-${produto.slug}`} onClick={handleAdd}>

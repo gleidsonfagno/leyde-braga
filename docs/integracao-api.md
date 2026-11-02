@@ -12,11 +12,19 @@ API utilizada: `https://leyde-braga-admin.vercel.app/api/v1`.
 - O catálogo tinha 28 produtos públicos, sete marcas ativas e 16 categorias ativas no momento da verificação. Esses números não estão fixados na aplicação.
 - A navegação principal mantém quatro categorias de apresentação; o catálogo disponibiliza todos os filtros retornados pela API.
 - As duas vitrines da página inicial mostram os primeiros 12 produtos da listagem da API. Não é atribuído um campo de destaque inexistente no backend.
-- Composição, modo de uso e estoque não são simulados. O contrato público atual não fornece esses campos. O parcelamento em até 2x foi autorizado pela loja e é escolhido somente no checkout, conforme `docs/checkout.md`.
+- Composição e modo de uso não são simulados. A API fornece o booleano público `inStock`, calculado por `stock > 0` no servidor. Ele determina **Em estoque** ou **Esgotado** em cartões e detalhes. Custo e quantidade interna continuam excluídos da resposta. A ausência do booleano em uma versão antiga da API resulta em disponibilidade a confirmar, sem presumir estoque. O parcelamento em até 2x é escolhido somente no checkout, conforme `docs/checkout.md`.
 - O detalhe mostra até quatro produtos relacionados da mesma categoria, excluindo o produto atual e duplicações. Uma única consulta de até cinco produtos usa o cache de exibição. A seção carrega separadamente em Suspense, sem aguardar as recomendações para apresentar o produto principal. Sem alternativas ou em falha da consulta, a seção fica oculta.
 - O catálogo de exemplo permanece em `lib/products.js` como referência histórica, sem importação pela aplicação ou fallback automático.
 - CSS, fontes, banners e configurações de imagem foram preservados. Imagens de produtos vêm das URLs da API, com alternativa visual neutra quando ausentes ou indisponíveis.
 - Pedidos e atendimento seguem pelo WhatsApp. Não foi criada uma rota de pedidos nem um processamento de pagamento.
+
+## Disponibilidade por estoque
+
+A API passou a fornecer `inStock` em listagens e detalhes no commit `d667c20`. A consulta interna lê `stock`, mas o serializador público devolve apenas o booleano, com allowlist explícita também para marcas, categorias e imagens. O namespace do cache público mudou para v2 para não reutilizar respostas do contrato antigo. A edição administrativa de estoque mantém a invalidação do cache existente.
+
+Cartões, detalhes e relacionados mostram **Em estoque** ou **Esgotado**. A compra de esgotados fica desabilitada; carrinho e checkout excluem itens que esgotaram ao atualizar a consulta. O cache de exibição de 15 segundos continua sujeito à revalidação descrita em `docs/navegacao.md`; a conferência do pedido consulta novamente a API, sem reutilizar o cache de exibição. Não há reserva de unidades nem validação do limite de quantidade solicitada contra o estoque interno.
+
+Builds aprovados nos dois projetos, com 34 testes da API e 39 da vitrine. A verificação pública da API e a integração da vitrine passaram com 58 produtos. Os testes novos de PostgreSQL dedicado ficaram pendentes por ausência de `TEST_DATABASE_URL`; a checagem de produção usou somente leituras e não alterou quantidades.
 
 ## Verificação
 

@@ -14,6 +14,8 @@ const html = await (await get(`${storefront}/categoria`)).text();
 assert.ok(html.includes(`${list.pagination.total} produtos`));
 assert.equal((html.match(/<article\b/g) || []).length, list.data.length);
 for (const product of list.data) assert.ok(html.includes(product.slug), product.slug);
+for (const product of list.data) assert.equal(typeof product.inStock, 'boolean', 'API pública fornece disponibilidade');
+assert.equal(html.includes('Consulte disponibilidade'), false);
 for (const brand of brands.data) assert.ok(html.includes(`marca=${brand.slug}`), brand.slug);
 for (const category of categories.data) assert.ok(html.includes(`cat=${category.slug}`), category.slug);
 
@@ -29,8 +31,13 @@ if (list.data.length) {
   const detail = await (await get(`${storefront}/produto?p=${product.slug}`)).text();
   assert.ok(detail.includes(product.name));
   assert.equal(detail.includes('class="p-parcela"'), false, 'Detalhe sem bloco de parcelamento');
-  assert.ok(detail.includes('Quantidade desejada'));
-  assert.ok(detail.includes('aria-describedby="quantidade-ajuda"'));
+  assert.ok(detail.includes(product.inStock ? 'Em estoque' : 'Produto esgotado'));
+  if (product.inStock) {
+    assert.ok(detail.includes('Quantidade desejada'));
+    assert.ok(detail.includes('aria-describedby="quantidade-ajuda"'));
+  } else {
+    assert.equal(detail.includes('id="btn-comprar"'), false);
+  }
   const filteredUrl = new URL('/categoria', storefront);
   filteredUrl.searchParams.set('q', product.code);
   filteredUrl.searchParams.set('marca', product.brand.slug);
@@ -42,6 +49,7 @@ if (list.data.length) {
   const cart = await response.json();
   assert.equal(cart.data.length, 1);
   assert.equal(cart.data[0].preco, product.price);
+  assert.equal(cart.data[0].disponibilidade, product.inStock ? 'disponivel' : 'indisponivel');
   for (const field of ['cost', 'stock', 'active', 'passwordHash', 'createdAt']) {
     assert.equal(JSON.stringify(cart).includes(`"${field}":`), false);
   }
@@ -71,4 +79,4 @@ assert.ok(missing.includes('Produto não encontrado'));
 assert.equal((await fetch(`${storefront}/api/catalog?slug=../admin/products`)).status, 400);
 assert.equal((await fetch(`${storefront}/api/catalog`, { method: 'POST' })).status, 405);
 
-console.log(JSON.stringify({ result: 'passed', storefront, products: list.pagination.total, brands: brands.data.length, categories: categories.data.length, checks: ['catalogo-real', 'paginacao', 'busca-e-filtros', 'detalhe-sem-parcelamento', ...(candidatoRelacionado ? ['produtos-relacionados'] : []), 'carrinho', 'campos-privados', 'produto-inexistente', 'busca-vazia', 'entrada-invalida', 'somente-leitura'] }, null, 2));
+console.log(JSON.stringify({ result: 'passed', storefront, products: list.pagination.total, brands: brands.data.length, categories: categories.data.length, checks: ['catalogo-real', 'paginacao', 'busca-e-filtros', 'detalhe-sem-parcelamento', 'disponibilidade-real', ...(candidatoRelacionado ? ['produtos-relacionados'] : []), 'carrinho', 'campos-privados', 'produto-inexistente', 'busca-vazia', 'entrada-invalida', 'somente-leitura'] }, null, 2));

@@ -43,7 +43,7 @@ export default function CarrinhoPage() {
         <h1 className="pagina-titulo">Meu carrinho</h1>
         <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--muted)' }}>
           <p style={{ fontSize: '18px', marginBottom: '8px' }}>Seu carrinho está vazio.</p>
-          {indisponiveis > 0 ? <p>Os itens anteriores não estão mais no catálogo público. Escolha os produtos atuais da loja.</p> : null}
+          {indisponiveis > 0 ? <p>Os itens anteriores estão esgotados ou fora do catálogo. Escolha outros produtos da loja.</p> : null}
           <Link prefetch={false} className="btn solid" href="/">
             Continuar comprando
           </Link>
@@ -58,7 +58,7 @@ export default function CarrinhoPage() {
         <Link prefetch={false} href="/">Início</Link> / Carrinho
       </div>
       <h1 className="pagina-titulo">Meu carrinho</h1>
-      {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
+      {indisponiveis > 0 ? <p role="status">Alguns itens estão esgotados ou fora do catálogo e não serão incluídos no pedido.</p> : null}
 
       <div className="pg-layout">
         <div id="carrinho-itens">

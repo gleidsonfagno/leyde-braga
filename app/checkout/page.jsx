@@ -247,7 +247,7 @@ export default function CheckoutPage() {
       </div>
       <h1 className="pagina-titulo">Finalizar pedido</h1>
 
-      {indisponiveis > 0 ? <p role="status">Alguns itens não estão mais no catálogo público e não serão incluídos no pedido.</p> : null}
+      {indisponiveis > 0 ? <p role="status">Alguns itens estão esgotados ou fora do catálogo e não serão incluídos no pedido.</p> : null}
       {errors.catalogo ? <p role="alert">{errors.catalogo}</p> : null}
       {Object.keys(errors).some((key) => key !== 'catalogo') ? <p role="alert">Revise os campos indicados. O pedido ainda não foi enviado.</p> : null}
       <p className="checkout-privacy">Ao confirmar, seus dados serão usados para preparar a mensagem no WhatsApp. Revise antes de enviar. <Link prefetch={false} href="/privacidade">Como seus dados são tratados</Link> · <Link prefetch={false} href="/termos-de-uso">Condições do catálogo</Link></p>
