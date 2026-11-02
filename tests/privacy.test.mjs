@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { CONSENT_DAYS, criarPreferencias, lerPreferencias, permiteEstatisticas } from '../lib/privacy.js';
+import { CONSENT_DAYS, criarPreferencias, lerPreferencias, permiteEstatisticas, providerId } from '../lib/privacy.js';
 import { criarTracking } from '../lib/tracking.js';
 import { lerPedidoLocal, ORDER_RETENTION_DAYS } from '../lib/order-storage.js';
 
 const now = Date.parse('2026-11-01T12:00:00Z');
 const id = 'G-TEST12345';
-const provider = `ga4:${id}`;
+const provider = providerId(id);
 
 test('estatísticas exigem escolha válida, específica e não vencida; sinais de privacidade prevalecem', () => {
   assert.equal(permiteEstatisticas(null, { id, now }), false);

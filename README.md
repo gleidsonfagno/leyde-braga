@@ -99,3 +99,5 @@ O resultado da integração está em [docs/integracao-api.md](docs/integracao-ap
 As funções de localização, entrega e pagamento do checkout estão documentadas em [docs/checkout.md](docs/checkout.md).
 
 Privacidade, consentimento, acessibilidade e pendências de direitos de imagem estão em [docs/privacidade-e-acessibilidade.md](docs/privacidade-e-acessibilidade.md). O Analytics permanece desligado enquanto `NEXT_PUBLIC_GA_MEASUREMENT_ID` estiver vazio; a infraestrutura de consentimento não é uma certificação jurídica ou de acessibilidade.
+
+O Pixel da Meta da loja (`1784326125895756`, identificador público) está integrado com consentimento específico para publicidade. A implementação registra somente PageView do catálogo e permite rejeitar ou revogar a opção. `NEXT_PUBLIC_META_PIXEL_ID` permite substituir o ID; valor vazio desativa a integração. Detalhes e verificação: [docs/meta-pixel.md](docs/meta-pixel.md).

@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { CONSENT_DAYS, GA_ID, PRIVACY_KEY, criarPreferencias, lerPreferencias, permiteEstatisticas } from '../lib/privacy';
+import { CONSENT_DAYS, GA_ID, META_PIXEL_ID, PRIVACY_KEY, criarPreferencias, lerPreferencias, permiteEstatisticas } from '../lib/privacy';
+import MetaPixel from './MetaPixel';
 import { criarTracking } from '../lib/tracking';
 import { lerPedidoLocal } from '../lib/order-storage';
 import { useCart } from './CartContext';
@@ -17,9 +18,11 @@ export function PrivacyProvider({ children }) {
   const [open, setOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [notice, setNotice] = useState('');
   const dialog = useRef(null);
   const tracker = useRef(null);
+  const pixelTracker = useRef(null);
   const dismissed = useRef(false);
   const pathname = usePathname();
 
@@ -64,11 +67,13 @@ export function PrivacyProvider({ children }) {
   }, [open, intro]);
 
   const close = () => { dismissed.current = true; setOpen(false); };
-  const configure = () => { setAnalytics(Boolean(preferences?.analytics && !privacySignal)); setIntro(false); setOpen(true); };
+  const configure = () => { setAnalytics(Boolean(preferences?.analytics && !privacySignal)); setMarketing(Boolean(preferences?.marketing && !privacySignal)); setIntro(false); setOpen(true); };
   const save = (value) => {
-    const next = criarPreferencias(Boolean(value && !privacySignal));
+    const choices = typeof value === 'boolean' ? { analytics: value, marketing: value } : value;
+    const next = criarPreferencias({ analytics: !privacySignal && choices.analytics, marketing: !privacySignal && choices.marketing });
     // Revogação interrompe a coleta antes de atualizar a interface.
     if (!next.analytics) tracker.current?.desativar();
+    if (!next.marketing) pixelTracker.current?.desativar();
     setPreferences(next);
     try { window.localStorage.setItem(PRIVACY_KEY, JSON.stringify(next)); setNotice('Preferências salvas.'); }
     catch { setNotice('Preferência aplicada somente nesta sessão: o navegador bloqueou o armazenamento.'); }
@@ -77,6 +82,7 @@ export function PrivacyProvider({ children }) {
 
   return <PrivacyContext.Provider value={{ ready, preferences, configure, save }}>
     {children}
+    <Suspense fallback={null}><MetaPixel tracker={pixelTracker} ready={ready} preferences={preferences} privacySignal={privacySignal} /></Suspense>
     <span className="sr-only" role="status">{notice}</span>
     <dialog ref={dialog} className="privacy-dialog" aria-labelledby="privacy-title" onCancel={close} onClose={close} onKeyDown={(event) => {
       if (event.key !== 'Tab') return;
@@ -90,24 +96,26 @@ export function PrivacyProvider({ children }) {
       <h2 id="privacy-title" tabIndex={-1}>{intro ? 'Sua privacidade' : 'Preferências de privacidade'}</h2>
       {intro ? <>
         <p>Usamos armazenamento necessário para manter seu carrinho e o último pedido neste navegador.</p>
-        <p>{GA_ID ? 'Estatísticas são opcionais e só serão ativadas se você permitir.' : 'Não há rastreadores de estatísticas ou publicidade ativos.'}</p>
+        <p>{META_PIXEL_ID ? 'Com sua permissão, o Pixel da Meta mede visitas ao catálogo para publicidade no Facebook e Instagram. Você pode recusar ou escolher nas preferências.' : GA_ID ? 'Estatísticas são opcionais e só serão ativadas se você permitir.' : 'Não há rastreadores de estatísticas ou publicidade ativos.'}</p>
         <p>Conheça nossa <Link prefetch={false} href="/privacidade" onClick={close}>Política de privacidade</Link>, os <Link prefetch={false} href="/termos-de-uso" onClick={close}>Termos do catálogo</Link> e a <Link prefetch={false} href="/cookies" onClick={close}>Política de cookies</Link>.</p>
         <div className="privacy-actions">
           <button type="button" className="btn solid" onClick={() => save(false)}>Continuar com necessários</button>
-          {GA_ID ? <button type="button" className="btn solid" onClick={() => save(true)}>Aceitar estatísticas</button> : null}
+          {GA_ID || META_PIXEL_ID ? <button type="button" className="btn solid" onClick={() => save(true)}>Aceitar opcionais</button> : null}
           <button type="button" className="btn" onClick={configure}>Configurar preferências</button>
           <button type="button" className="btn" onClick={close}>Fechar sem escolher</button>
         </div>
       </> : <>
-      <p>O carrinho, o pedido local e sua escolha de privacidade são recursos necessários. Eles não dependem de aceitar estatísticas.</p>
+      <p>O carrinho, o pedido local e sua escolha de privacidade são recursos necessários. Eles não dependem de aceitar estatísticas ou publicidade.</p>
       <label className="privacy-option"><input type="checkbox" checked readOnly disabled /> Armazenamento necessário</label>
       <label className="privacy-option"><input type="checkbox" checked={analytics} disabled={!GA_ID || privacySignal} onChange={(event) => setAnalytics(event.target.checked)} /> Estatísticas opcionais de visitas</label>
-      <p>{GA_ID ? 'Com sua permissão, o Google Analytics recebe páginas visitadas sem os campos do pedido. Publicidade e Google Signals ficam desativados.' : 'Nenhuma ferramenta de estatísticas ou publicidade está configurada neste catálogo.'}</p>
-      {privacySignal ? <p>Seu navegador sinalizou preferência por não rastrear; estatísticas permanecem desativadas.</p> : null}
+      <p>{GA_ID ? 'Com sua permissão, o Google Analytics recebe páginas visitadas sem os campos do pedido. Google Signals permanece desativado.' : 'Google Analytics não está configurado.'}</p>
+      <label className="privacy-option"><input type="checkbox" checked={marketing} disabled={!META_PIXEL_ID || privacySignal} onChange={(event) => setMarketing(event.target.checked)} /> Publicidade — Pixel da Meta</label>
+      <p>{META_PIXEL_ID ? 'Com sua permissão, a Meta recebe visualizações do catálogo, URLs e dados técnicos do navegador para medir publicidade. Não enviamos os campos do pedido nem registramos compras. Checkout, confirmação e busca livre ficam fora do rastreamento.' : 'Pixel da Meta não está configurado.'}</p>
+      {privacySignal ? <p>Seu navegador sinalizou preferência por não rastrear; estatísticas e publicidade permanecem desativadas.</p> : null}
       <p><Link prefetch={false} href="/cookies" onClick={close}>Leia a política de cookies e armazenamento</Link>.</p>
       <div className="privacy-actions">
         <button type="button" className="btn" onClick={() => save(false)}>Rejeitar opcionais</button>
-        <button type="button" className="btn" onClick={() => save(analytics)}>Salvar preferências</button>
+        <button type="button" className="btn" onClick={() => save({ analytics, marketing })}>Salvar preferências</button>
         <button type="button" className="btn" onClick={close}>Fechar</button>
       </div>
       </>}
