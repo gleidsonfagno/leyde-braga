@@ -23,9 +23,9 @@ export default function Header() {
     <header className="site-head">
       <div className="head-row container">
         <div className="logo">
-          <Link prefetch={false} href="/">
-            {LEYDE.nomeLoja}
-            <small>Beleza &amp; Perfumaria</small>
+          <Link prefetch={false} href="/" aria-label={`Flor da Manhã — ${LEYDE.nomeLoja}`}>
+            FLOR DA MANHÃ
+            <small>{LEYDE.nomeLoja}</small>
           </Link>
         </div>
         <form className="search" id="form-busca" onSubmit={handleSearch} role="search">

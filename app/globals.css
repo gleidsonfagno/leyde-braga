@@ -90,6 +90,10 @@ input::placeholder, textarea::placeholder { color: #626466; opacity: 1; }
 .marcas img.marca-logo, .marcas a:hover img.marca-logo, .marcas a:focus-visible img.marca-logo { width: 132px; height: 42px; max-width: 100%; object-fit: contain; filter: grayscale(1); opacity: 1; }
 .marcas a { padding: 4px; min-width: 112px; }
 .site-foot .footer-link { color: #fff; font-size: 13px; }
+.logo a { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.4; }
+@media (max-width: 420px) {
+  .logo a { font-size: 17px; letter-spacing: .08em; }
+}
 .foot-bottom .container { display: block; padding-top: 0; padding-bottom: 0; }
 .policy-page { max-width: 900px; padding-bottom: 35px; overflow-wrap: anywhere; }
 .policy-page p { margin: 12px 0; line-height: 1.8; font-size: 15px; }
