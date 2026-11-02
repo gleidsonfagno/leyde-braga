@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { centavos } from '../lib/money.js';
+import { descricaoParcelas, MAX_PARCELAS_CARTAO } from '../lib/payment.js';
 
 const storefront = process.env.STOREFRONT_URL || 'http://127.0.0.1:3137';
 const api = process.env.CATALOG_API_URL || 'https://leyde-braga-admin.vercel.app/api/v1';
@@ -28,6 +30,12 @@ if (list.data.length) {
   const product = list.data[0];
   const detail = await (await get(`${storefront}/produto?p=${product.slug}`)).text();
   assert.ok(detail.includes(product.name));
+  const parcelas = centavos(product.price) >= BigInt(MAX_PARCELAS_CARTAO) ? MAX_PARCELAS_CARTAO : 1;
+  assert.ok(detail.includes(descricaoParcelas(product.price, parcelas)), 'Parcelamento do preço público no detalhe');
+  assert.ok(detail.includes('no cartão de crédito'));
+  assert.ok(detail.includes('Por unidade, sem incluir o frete.'));
+  assert.ok(detail.includes('Quantidade desejada'));
+  assert.ok(detail.includes('aria-describedby="quantidade-ajuda"'));
   const filteredUrl = new URL('/categoria', storefront);
   filteredUrl.searchParams.set('q', product.code);
   filteredUrl.searchParams.set('marca', product.brand.slug);
@@ -51,4 +59,4 @@ assert.ok(missing.includes('Produto não encontrado'));
 assert.equal((await fetch(`${storefront}/api/catalog?slug=../admin/products`)).status, 400);
 assert.equal((await fetch(`${storefront}/api/catalog`, { method: 'POST' })).status, 405);
 
-console.log(JSON.stringify({ result: 'passed', storefront, products: list.pagination.total, brands: brands.data.length, categories: categories.data.length, checks: ['catalogo-real', 'paginacao', 'busca-e-filtros', 'detalhe', 'carrinho', 'campos-privados', 'produto-inexistente', 'busca-vazia', 'entrada-invalida', 'somente-leitura'] }, null, 2));
+console.log(JSON.stringify({ result: 'passed', storefront, products: list.pagination.total, brands: brands.data.length, categories: categories.data.length, checks: ['catalogo-real', 'paginacao', 'busca-e-filtros', 'detalhe', 'parcelamento-no-detalhe', 'carrinho', 'campos-privados', 'produto-inexistente', 'busca-vazia', 'entrada-invalida', 'somente-leitura'] }, null, 2));
