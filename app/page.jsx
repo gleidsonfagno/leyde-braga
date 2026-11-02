@@ -3,13 +3,13 @@ import Hero from '../components/Hero';
 import Shelf from '../components/Shelf';
 import Link from 'next/link';
 import CatalogMessage from '../components/CatalogMessage';
-import { catalogApi, obterTaxonomias } from '../lib/catalog-api';
+import { catalogVitrineApi, obterTaxonomias } from '../lib/catalog-api';
 import { apresentacaoCatalogo } from '../lib/catalog-presentation';
 
 export default async function HomePage() {
   const [taxonomias, catalogo] = await Promise.all([
     obterTaxonomias(),
-    catalogApi.produtos({ pageSize: 100 }).catch(() => null),
+    catalogVitrineApi.produtos({ pageSize: 100 }).catch(() => null),
   ]);
   const apresentacao = apresentacaoCatalogo(taxonomias.categorias, catalogo?.produtos || []);
   const vitrine = catalogo?.produtos.slice(0, 12) || [];

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from './CatalogLink';
 import ProductImage from './ProductImage';
 
 export default function CategoryTiles({ categorias }) {

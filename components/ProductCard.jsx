@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from './CatalogLink';
 import { useCart } from './CartContext';
 import { useToast } from './ToastContext';
 import { formatarBRL } from '../lib/money';

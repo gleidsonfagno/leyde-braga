@@ -67,7 +67,7 @@ test('listas de marcas/categorias vêm da API e rejeitam respostas inválidas', 
   assert.equal('active' in taxonomias.marcas[0], false);
 });
 
-test('somente marcas e categorias usam cache curto; produtos e preços permanecem atuais', async () => {
+test('cliente de conferência mantém produtos sem cache; taxonomias têm cache próprio', async () => {
   const consultas = [];
   const client = criarClienteCatalogo({ fetchImpl: async (url, init) => {
     consultas.push({ caminho: url.pathname, init });
@@ -90,6 +90,38 @@ test('somente marcas e categorias usam cache curto; produtos e preços permanece
       assert.equal(init.next, undefined);
     }
   }
+});
+
+test('cliente de exibição usa 15 segundos e mantém pesquisas sem cache', async () => {
+  const consultas = [];
+  const client = criarClienteCatalogo({ cachePublico: 15, fetchImpl: async (url, init) => {
+    consultas.push({ url, init });
+    return url.pathname.endsWith('/produto-real') ? Response.json({ data: produto }) : Response.json({ data: [produto], pagination: { page: 1, pageSize: 20, total: 1 } });
+  } });
+  await client.produtos({ categoria: 'perfumes' });
+  await client.produto('produto-real');
+  await client.produtos({ q: 'busca digitada' });
+  for (const consulta of consultas.slice(0, 2)) {
+    assert.equal(consulta.init.cache, 'force-cache');
+    assert.deepEqual(consulta.init.next, { revalidate: 15 });
+    assert.equal(consulta.init.credentials, 'omit');
+  }
+  assert.equal(consultas[2].init.cache, 'no-store');
+  assert.equal(consultas[2].init.next, undefined);
+});
+
+test('conferência de produto lê uma alteração de preço sem reutilizar a exibição', async () => {
+  let precoAtual = '10.00';
+  let leituras = 0;
+  const client = criarClienteCatalogo({ fetchImpl: async (_, init) => {
+    assert.equal(init.cache, 'no-store');
+    leituras++;
+    return Response.json({ data: { ...produto, price: precoAtual } });
+  } });
+  assert.equal((await client.produto('produto-real')).preco, '10.00');
+  precoAtual = '12.50';
+  assert.equal((await client.produto('produto-real')).preco, '12.50');
+  assert.equal(leituras, 2);
 });
 
 test('uma falha transitória de leitura é repetida uma vez, sem repetir 404 ou entradas inválidas', async () => {

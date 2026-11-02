@@ -1,16 +1,17 @@
 import Link from 'next/link';
+import CatalogLink from '../../components/CatalogLink';
 import { Suspense } from 'react';
 import Loading from '../loading';
 import ProductCard from '../../components/ProductCard';
-import { catalogApi, obterTaxonomias } from '../../lib/catalog-api';
+import { catalogVitrineApi, obterTaxonomias } from '../../lib/catalog-api';
 import { categoriaHref as buildHref, filtrosDoCatalogo } from '../../lib/catalog';
 import CatalogMessage from '../../components/CatalogMessage';
 
 function Chip({ href, label, active }) {
   return (
-    <Link prefetch={false} className={`chip${active ? ' ativo' : ''}`} href={href}>
+    <CatalogLink className={`chip${active ? ' ativo' : ''}`} href={href}>
       {label}
-    </Link>
+    </CatalogLink>
   );
 }
 
@@ -26,7 +27,7 @@ async function CatalogoCategorias({ params }) {
   const filtros = filtrosDoCatalogo(params, taxonomias);
   const { categoria: catAtual, marca: marcaAtual, q, page } = filtros;
   let catalogo;
-  try { catalogo = await catalogApi.produtos(filtros); } catch { /* Falha não é catálogo vazio. */ }
+  try { catalogo = await catalogVitrineApi.produtos(filtros); } catch { /* Falha não é catálogo vazio. */ }
   const lista = catalogo?.produtos || [];
   const total = catalogo?.paginacao.total || 0;
   const paginas = Math.max(1, Math.ceil(total / 20));
