@@ -88,7 +88,7 @@ const luminancia = (hex) => {
 };
 const contraste = (a, b) => (Math.max(luminancia(a), luminancia(b)) + 0.05) / (Math.min(luminancia(a), luminancia(b)) + 0.05);
 
-test('cores de texto revisadas têm contraste mínimo 4,5:1 sobre branco e painéis claros', async () => {
+test('textos e títulos mantêm os contrastes mínimos nos fundos utilizados', async () => {
   const css = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
   for (const token of ['muted-2', 'accent-2', 'success', 'danger']) {
     const hex = css.match(new RegExp(`--${token}: (#[a-f0-9]{6})`))[1];
@@ -96,4 +96,6 @@ test('cores de texto revisadas têm contraste mínimo 4,5:1 sobre branco e pain�
   }
   assert.ok(contraste('#005fcc', '#ffffff') >= 3);
   for (const fundo of ['#ffffff', '#f5f5f5']) assert.ok(contraste('#000000', fundo) >= 4.5);
+  const titulo = css.match(/--title-gold: (#[a-f0-9]{6})/)[1];
+  for (const fundo of ['#ffffff', '#fffcf7', '#f3eee4', '#faf7f1']) assert.ok(contraste(titulo, fundo) >= 3, `Título grande sobre ${fundo}`);
 });

@@ -20,7 +20,7 @@ As páginas públicas descrevem o fluxo real: API de catálogo, carrinho local, 
 
 Atalho para o conteúdo; menu Marcas com botão real, estado expandido, Tab e Escape; destaques manuais sem rotação automática e slides inativos fora da navegação; textos alternativos e miniaturas decorativas; nomes de controles de quantidade; mensagens de erro associadas aos campos e foco no primeiro campo inválido; grupo de pagamento identificado; foco visível; contraste de textos e estados revisado; aviso que não cobre foco; respeito ao zoom e às preferências de movimento reduzido já existentes.
 
-As cores revisadas de texto passam 4,5:1 sobre branco e os painéis claros utilizados. O foco tem indicação com contraste sobre os fundos verificados. Isso não equivale a uma auditoria integral WCAG: fotos de fornecedores, leitores de tela reais e serviços externos ainda precisam de avaliação. Não foi instalada uma sobreposição automática de acessibilidade.
+As cores de textos comuns passam 4,5:1 sobre branco e os painéis claros utilizados. Títulos grandes usam dourado próprio, com pelo menos 3:1 nos fundos claros e em creme verificados. Banners e categorias receberam fundos suaves em creme/champagne, molduras e respiro entre texto e fotos, mantendo as fontes existentes. O foco tem indicação com contraste sobre os fundos verificados. Isso não equivale a uma auditoria integral WCAG: fotos de fornecedores, leitores de tela reais e serviços externos ainda precisam de avaliação. Não foi instalada uma sobreposição automática de acessibilidade.
 
 ## Imagens e pendências
 
